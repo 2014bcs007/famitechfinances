@@ -1,0 +1,61 @@
+{% extends 'base_auth.html' %}
+{% load static %}
+{% block content %}
+<div class="row">
+<div class="col-md-4"></div>
+<div class="col-md-4">
+    <div class="card mt-5">
+        <div class="card-title mt-2">
+            <h1 style="text-align:center">Signup for an account</h1>
+        </div>
+        <div class="card-body">
+            <form action="{% url 'register' %}" method="POST" >
+                {% csrf_token %}
+                <div class="form-group ">
+                    {% include 'partials/_messages.html'  %}
+                </div>
+                <div class="form-group mt-2">
+                    <input class="form-control form-control-sm" value="{{fieldValues.username}}" id="username" placeholder="Username" name="username" type="text" >
+                </div>
+                <div class="invalidFeedback" style="display: none;">
+
+                </div>
+                <p class="text-sm text-success usernameSuccessOutput"></p>
+                <div class="form-group mt-2">
+                    <input class="form-control form-control-sm" id="email" value="{{fieldValues.email}}" name="email" type="email" placeholder="Email" >
+                </div>
+                <div class="invalidEmailFeedback" style="display: none;">
+
+                </div>
+                <p class="text-sm text-success emailSuccessOutput"></p>
+                <div class="form-group mt-2">
+                    <input class="form-control form-control-sm password" id="password" value="{{fieldValues.password}}" name="password" type="password" placeholder="Password" />
+                </div>
+                <div class="form-group mt-2">
+                    <input class="form-control form-control-sm confirmPassword" id="confirmPassword" value="{{fieldValues.confirmPassword}}" name="confirmPassword" type="password" placeholder="Confirm Password" />
+                </div>
+                <div class="comparePasswod" style="display: none;">
+
+                </div>
+                <div class="form-group mt-2">
+                    <small class="showPasswordToggle" style="float:right; margin: top 2px;">SHOW</small>
+                </div>
+                    <input class="btn btn-block btn-primary register" id="register" name="register" type="submit" value="Register" />
+            </form> 
+            <div class="row">
+                <div class="col-md-6 col-lg-6 col-sm-6">
+                    <label for="" class="form-label text-lead lead">With Account</label>
+                    <a href="{% url 'login' %}">Login</a>    
+                </div>        
+                <div class="col-md-6 col-lg-6 col-sm-6">
+                    <label for="" class="form-label text-lead lead">Forgot Password?</label>
+                    <a href="{% url 'resetpassword' %}">Reset</a>    
+                </div>
+            </div>
+        </div> 
+    </div>
+</div>
+<div class="col-md-4"></div>
+</div>
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock %}

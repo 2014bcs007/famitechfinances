@@ -1,0 +1,62 @@
+
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.88.1">
+    <title>Famitech finance Income PDF {% block title %} 
+        {% endblock %}
+    </title>
+    <style>
+        @page{
+            size:"A4";
+            margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+        
+        @top-center {
+            content:"Famitech Finances";
+        }
+        @bottom-right{
+          content: "Page" counter(page) " of " counter(pages);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <img src="https://liveduuka.com/wp-content/uploads/2021/09/256701677171_status_00ee818985084f16afa78da5e2653dad.jpg" /> -->
+    <h2>Expense List</h2>
+    <table class="table caption-top">
+      <caption>List of Incomes</caption>
+                            <thead class="thead">
+                              <tr>
+                                <th>No</th>
+                                <th scope="col">Amount({{currency}})</th>
+                                <th scope="col">Source</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Created By</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for income in incomes %}
+                                <tr>
+                                  <td>{{forloop.counter}}</td>
+                                  <td>{{income.amount}}</td>
+                                  <td>{{income.source}}</td>
+                                  <td>{{income.description}}</td>
+                                  <td>{{income.date}}</td>
+                                  <td>{{income.owner}}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                  <td>Total</td>
+                                  <td>{{total}}</td>
+                                </tr>
+                            </tbody>
+    </table>
+  </body>
+</html>

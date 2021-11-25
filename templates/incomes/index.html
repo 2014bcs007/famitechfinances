@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block content %}
+        <div class="container mt-4">
+            <div class="row">
+                <h2>Add Income </h2>
+                <div class="col-md-10">
+                    <nav arial-label="breadcrumb">
+                        <ol class="breadcrumb" >
+                            <li class="breadcrumb-item"><a href="">Incomes</a></li>
+                            <li class="breadcrumb-item active" arial-current="page">My Incomes</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'addincome' %}" class="btn btn-primary"> Add Incomes</a>
+                </div>
+
+            </div>
+            <div class="container">
+                
+    {% include 'partials/_messages.html'  %}
+                {% if incomeList.count %}
+                <div class="table-responsive">
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <a href="{% url 'exportpdf' %}" class="btn btn-info" >Export PDF</a>
+                            <a href="{% url 'exportexcel' %}" class="btn btn-primary" >Export EXCEL</a>
+                            <a href="{% url 'exportcsv' %}" class="btn btn-secondary" >Export CSV</a>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="searchField" placeholder="Search">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="expenses-current-table" id="expenses-current-table">
+                        <table class="table table-hover caption-top table-bordered ">
+                            <caption>List of Incomes</caption>
+                            <thead>
+                              <tr>
+                                <th scope="col">Amount({{currency}})</th>
+                                <th scope="col">Source</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Created By</th>
+                                <th scope="col"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+    
+                                {% for incomes in page_object %}
+                                <tr>
+                                  <td>{{incomes.amount}}</td>
+                                  <td>{{incomes.source}}</td>
+                                  <td>{{incomes.description}}</td>
+                                  <td>{{incomes.date}}</td>
+                                  <td>{{incomes.owner}}</td>
+                                  <td>
+                                      <a href="{% url 'editIncome' incomes.id %}" class="btn btn-primary btn-sm" >Edit</a>
+                                      <a href="{% url 'deleteIncome' incomes.id %}" id="delete-object" data-object-id="{{ incomes.id }}" class="btn btn-danger btn-sm" >Delete</a>
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                          </table>
+                    </div>
+
+                </div>
+                <div class="table-output" id="table-output" >
+                    
+                    <table class="table table-hover caption-top table-bordered ">
+                        <caption>List of Incomes</caption>
+                        <thead>
+                          <tr>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Source</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Created By</th>
+                            <th scope="col"></th>
+                          </tr>
+                        </thead>
+                        <tbody class="searchTableBody">
+
+                        </tbody>
+                      </table>
+                </div>
+
+                <!-- <div class="">
+                    Showing Page {{page_object.number}} of {{page_object.paginator.num_pages }}
+                </div> -->
+                
+                <div class="pagination-container">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                          
+                            {% if page_object.has_previous %}
+                            <li class="page-item ">
+                                <a href="?page=1" class="page-link" >&laquo; first</a>
+                            </li>
+                            <li class="page-item ">
+                                <a href="?page={{ page_object.previous_page_number }}" class="page-link">previous</a>
+                            </li>
+                            {% endif %}
+                          
+                          <li class="page-item"><a class="page-link" class="current" href="#">Page {{ page_object.number }} of {{ page_object.paginator.num_pages }}</a></li>
+                          
+                            {% if page_object.has_next %}
+                            <li class="page-item ">
+                                <a href="?page={{ page_object.next_page_number }}" class="page-link" >next</a>
+                            </li>
+                            <li class="page-item ">
+                                <a href="?page={{ page_object.paginator.num_pages }}" class="page-link" >last &raquo;</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                      </nav>
+                </div>
+
+                {% endif %}
+            </div>
+            
+<script src="{% static 'js/deleteobject.js' %}"></script>
+<script src="{% static 'js/searchincome.js' %}"></script>
+        </div>
+    {% endblock content %}
+    

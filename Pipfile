@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+mysqlclient = "*"
+python-dotenv = "*"
+django-heroku = "*"
+gunicorn = "*"
+whitenoise = {extras = ["brotli"], version = "*"}
+valid-email = "*"
+validate-email = "*"
+six = "*"
+xlwt = "*"
+weasyprint = "*"
+pip = "*"
+djangorestframework = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

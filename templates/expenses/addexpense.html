@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-10">
+            <nav arial-label="breadcrumb">
+                <ol class="breadcrumb" >
+                    <li class="breadcrumb-item"><a href="">Expenses</a></li>
+                    <li class="breadcrumb-item active" arial-current="page">My Expenses</li>
+                </ol>
+            </nav>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'expenses' %}" class="btn btn-primary"> View Expenses</a>
+            </div>
+        </div>   
+        <div class="row mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h1>Add Expenses</h1>
+                <form action="{% url 'addexpense' %}" method="post">
+                    
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        {% include 'partials/_messages.html'  %}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="" class="form-label">Amount</label>
+                        <input type="number" value="{{fieldValues.amount}}" class="form-control" id="amount" name="amount" >
+                    </div>
+                    <div class="form-group mb-3">                        
+                        <label for="" class="form-label">Category</label>
+                        <select class="form-select " id="category" name="category" aria-describedby="validationServer04Feedback" >                            
+                        <!-- <option selected disabled value="">Choose...</option> -->
+                            {% for category in categories %}
+                        <option name="category" value="{{category.name}}">{{category.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="" class="form-label">Date of Expense</label>
+                        <input type="date" class="form-control" id="expensedate" name="expensedate" >
+                    </div>
+                    <div class="form-group mb-3">
+                          <label for=""  class="form-label">Description</label>
+                          <textarea class="form-control " value="{{fieldValues.description}}" name="description" id="description" placeholder=" Description" ></textarea>
+                    </div>
+                    <input class="btn btn-primary pull-right mt-3" value="submit" type="submit" />
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock content %}
