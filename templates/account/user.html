@@ -1,0 +1,83 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n %}
+
+{% block head_title %}{% trans "User/Member" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-body">
+            <div class="card-title"> Member
+                <a href="{%url 'members'%}" class="btn btn-xs btn-primary pull-right">back to list</a>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <ul class="nav nav-pills nav-pills-vertical nav-pills-info" id="v-pills-tab" role="tablist"
+                        aria-orientation="vertical">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="v-pills-profile-tab" data-toggle="pill"
+                                href="#v-pills-profile" role="tab" aria-controls="v-pills-profile"
+                                aria-selected="false">
+                                <i class="mdi mdi-account-outline"></i> {%trans 'Profile'%}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="v-pills-next-of-kin-tab" data-toggle="pill" href="#v-pills-next-of-kin"
+                                role="tab" aria-controls="v-pills-next-of-kin" aria-selected="false">
+                                <i class="mdi mdi-account-multiple-outline"></i> {%trans 'Next of kin'%}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="v-pills-attachments-tab" data-toggle="pill" href="#v-pills-attachments"
+                                role="tab" aria-controls="v-pills-attachments" aria-selected="false">
+                                <i class="mdi mdi-paperclip"></i> {%trans 'Attachments'%}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="v-pills-accounts-tab" data-toggle="pill" href="#v-pills-accounts"
+                                role="tab" aria-controls="v-pills-accounts" aria-selected="false">
+                                <i class="mdi mdi-account-multiple-outline"></i> {%trans 'Accounts'%}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="v-pills-group-membership-tab" data-toggle="pill" href="#v-pills-group-membership"
+                                role="tab" aria-controls="v-pills-group-membership" aria-selected="false">
+                                <i class="mdi mdi-account-multiple-outline"></i> {%trans 'Memberships'%}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-10">
+                    <div class="tab-content tab-content-vertical p-2" id="v-pills-tabContent">
+                        <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel"
+                            aria-labelledby="v-pills-profile-tab">
+                            Prf
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-next-of-kin" role="tabpanel"
+                            aria-labelledby="v-pills-next-of-kin-tab">
+                            Kin
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-attachments" role="tabpanel"
+                            aria-labelledby="v-pills-attachments-tab">
+                            Att
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-accounts" role="tabpanel"
+                            aria-labelledby="v-pills-accounts-tab">
+                            {%include 'finances/partials/accounts-section.html' with target=member model_id=member.id target_model_name='user'%}
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-group-membership" role="tabpanel"
+                            aria-labelledby="v-pills-group-membership-tab">
+                            GP
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{%endblock%}

@@ -1,0 +1,14 @@
+{%if list%}
+{%for role in list%}
+<tr>
+    <td>{{role.id}}</td>
+    <td>{{role.name|default_if_none:''}}</td>
+    <td>{{role.permissions.all.count}}</td>
+    <td>
+        <a hx-get="{%url 'user-role' role.id%}" hx-target=".card-body" class="fa fa-eye text-primary"></a>
+    </td>
+</tr>
+{%if forloop.last and list.has_next%} <tr hx-get="{%url 'user-roles'%}?display=list&page={{list.next_page_number}}" hx-trigger="revealed" hx-target="this"
+hx-swap="outerHTML"><td></td><td></td><td></td><td></td></tr> {%endif%}
+{%endfor%}
+{%endif%}

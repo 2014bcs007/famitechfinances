@@ -1,0 +1,146 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags crispy_forms_tags %}
+
+{% block head_title %}{{client}}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    {{client}} - {{client.email}}
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item"><a class="nav-link active" href="#general-tab" data-toggle="tab">Summary</a></li>
+                        <li class="nav-item"><a class="nav-link " href="#employees-tab" data-toggle="tab">Employees</a></li>
+                        {%if request.user.is_client and request.user.id == client.id or request.user.is_superuser%}<li class="nav-item"><a class="nav-link " href="#profile-tab" data-toggle="tab">Profile</a></li>{%endif%}
+
+                        <div class="btn-group pull-right" style="padding:6px;">
+                        </div>
+
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane  active" id="general-tab">
+                            <!-- Info boxes -->
+                            <div class="row">
+                                <div class="col-md-3 col-sm-6 col-xs-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-blue"><i class="fa fa-barcode"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Assets</span>
+                                            <span class="info-box-number" style="font-size:42px">0</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-md-3 col-sm-6 col-xs-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-success"><i class="fa fa-certificate"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Licenses</span>
+                                            <span class="info-box-number" style="font-size:42px">0</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </div>
+                                <!-- /.col -->
+
+                                <!-- fix for small devices only -->
+                                <div class="clearfix visible-sm-block"></div>
+                                <div class="col-md-3 col-sm-6 col-xs-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-yellow"><i class="fa fa-lightbulb-o"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Projects</span>
+                                            <span class="info-box-number" style="font-size:42px">0</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-md-3 col-sm-6 col-xs-12">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-purple"><i class="fa fa-users"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Users</span>
+                                            <span class="info-box-number" style="font-size:42px">10</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                    <!-- /.info-box -->
+                                </div>
+                                <!-- /.col -->
+                            </div>
+                            <!-- /.row -->
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <!-- BAR CHART -->
+                                    <div class="box box-primary">
+                                        <div class="box-header with-border">
+                                            <h3 class="card-title">Total Worked Hours</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                                        class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="chart">
+                                                <canvas id="Client6Chart" style="height:230px"></canvas>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                    </div>
+                                    <!-- /.box -->
+                                </div>
+
+                                <div class="col-md-4">
+                                    <!-- ASSIGNED ADMINS -->
+                                    <div class="box box-primary">
+                                        <div class="box-header with-border">
+                                            <h3 class="card-title">Assigned Staff</h3>
+                                            <div class="box-tools pull-right">
+                                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
+                                                        class="fa fa-minus"></i></button>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <div class="box-body ">
+                                            <!-- /.users-list -->
+                                            There are no assigned admins to display.
+                                        </div>
+                                        <!-- /.box-body -->
+                                    </div>
+                                    <!--/.box -->
+
+                                </div>
+                                <!-- /.col -->
+                            </div>
+                            <!-- /.row -->
+                        </div>
+
+                        <div class="tab-pane " id="employees-tab">
+                            
+                        </div>
+                        {%if request.user.is_client and request.user.id == client.id or request.user.is_superuser%}
+                        <div class="tab-pane" id="profile-tab">
+                            <div class="row">
+                                
+                            </div>
+                        </div>
+                        {%endif%}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

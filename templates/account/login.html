@@ -1,0 +1,51 @@
+{%extends 'account/base.html'%}
+
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+
+{%block content%}
+
+<div class="form-title">
+  <h2 style="font-weight: bold;margin-bottom: 0px !important;font-size: 30px">Welcome,sign in with
+      your existing account credentials</h2>
+</div>
+<div class="text-center" style="position: relative">
+
+  <div class="toggle hidden"></div>
+  <div class="form formLogin">
+      <form action="{% url 'account_login' %}" method="POST" >
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+          <button type="submit" class="btn btn-success btn-block" name="userLoginButton"
+              value="userLoginButton">SIGN IN</button>
+          <div class="actions-panel">
+            <a href="{%url 'account_reset_password'%}" class="auth-link">{% trans "Forgot password?"%}</a>
+          </div>
+      </form>
+  </div>
+  <div class="form formRegister"></div>
+</div>
+<!-- {% include "account/snippets/provider_list.html" with process="login" %} -->
+
+<!-- <a href="{%url 'account_reset_password'%}" class="auth-link text-black">{% trans "Forgot password?"%}</a> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+{%endblock%}

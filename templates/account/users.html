@@ -1,0 +1,28 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags %}
+
+{% block head_title %}{% trans "Users List" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <h5 class="card-title">{%trans 'Users List'%}
+                {%if 'users.add_user' in perms%}
+                <button hx-get="{%url 'users'%}?htmx=1&action=get-form" hx-target="#modal-dialog" class="btn btn-xs btn-primary ml-2">{%trans 'Add user'%}</button>
+                {%endif%}
+            </h5>
+            <div class="card-body pl-0 pr-0 pt-0">
+                <div class="table-responsive" hx-get="{%url 'users'%}?htmx=1&display={{display}}" hx-trigger="userListChanged from:body">
+                    {%include 'account/partials/users-list.html'%}
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

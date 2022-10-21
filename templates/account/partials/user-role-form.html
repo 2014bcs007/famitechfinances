@@ -1,0 +1,42 @@
+{% load static i18n crispy_forms_tags %}
+{%if form%}
+<form name="user-role-form" hx-post="{%if role%}{%url 'user-role' role.id%}{%else%}{%url 'user-roles'%}{%endif%}"
+    hx-encoding="multipart/form-data">
+    <div class="modal-header">
+        <h5 class="modal-title">{%if role%}{%trans 'Edit '%} {{role}}{%else%}{%trans 'New role'%}{%endif%}</h5>
+        <button hx-get="{%url 'user-roles'%}?htmx=1" hx-target=".card-body" type="button" class="close"
+            data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        {%csrf_token%}
+        {% for field in form.visible_fields %}
+        <div>
+            <!-- {# Include the hidden fields in the form #} -->
+            {% if forloop.first %}
+            {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            {% endif %}
+            {{ field.errors.as_ul }}
+            {%if field.name == 'permissions'%}
+            <button onClick="toggleCheckAll('user-role-form',true)" class="btn btn-default check-all" type="button">Check All</button>
+            <button onClick="toggleCheckAll('user-role-form',false)" class="btn btn-default check-all" type="button">UnCheck All</button>
+            <button class="btn btn-primary">Save</button>
+            {%endif%}
+            {{ field|as_crispy_field }}
+            {%if field.name == 'permissions'%}
+            <button onClick="toggleCheckAll('user-role-form',true)" class="btn btn-default check-all" type="button">Check All</button>
+            <button onClick="toggleCheckAll('user-role-form',false)" class="btn btn-default check-all" type="button">UnCheck All</button>
+            {%endif%}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="modal-footer text-right">
+        <button class="btn btn-primary btn-block">Save</button>
+    </div>
+</form>
+{%else%}
+
+{%endif%}

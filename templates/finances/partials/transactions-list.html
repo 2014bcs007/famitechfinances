@@ -1,0 +1,37 @@
+{% load static i18n custom_tags %}
+{%if transactions%}
+<table class="table table-striped" data-toggle="table">
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>#</th>
+            {% for key, value in transactions.0.items %}
+            {%if not key == 'id'%}<th>{{ key|replace:"_| "|capfirst }}</th>{%endif%}
+            {% endfor %}
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for transaction in transactions%}
+        <tr>
+            <td>
+                {%if 'finances.edit_transaction' in perms%}
+                <button hx-get="{%url 'transaction' transaction.id%}?action=get-form" hx-target="#modal-dialog" class="btn btn-xs btn-primary">{%trans 'edit'%}</button>
+                {%endif%}
+            </td>
+            <td>{{forloop.counter}}</td>
+            {% for key, value in transaction.items %}
+            {%if not key == 'id'%}<td>{{ value|default_if_none:'' }}</td>{%endif%}
+            {% endfor %}
+            <td>
+                {%if 'finances.edit_transaction' in perms%}
+                <button hx-get="{%url 'transaction' transaction.id%}?action=get-form" hx-target="#modal-dialog" class="btn btn-xs btn-primary">{%trans 'edit'%}</button>
+                {%endif%}
+            </td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%else%}
+    <div class="alert alert-danger">No data to display</div>
+{%endif%}

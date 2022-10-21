@@ -1,0 +1,28 @@
+{% load static i18n custom_tags %}
+<div class="modal-content">
+    <form hx-post="{%if id%}{%url 'term' id%}{%else%}{%url 'terms' term_key%}{%endif%}"
+        hx-encoding="multipart/form-data">
+        <div class="modal-header">
+            <h5 class="modal-title">{%if id%} {%trans 'Edit'%}{%else%}{%trans 'New'%}{%endif%} {%trans term_key|replace:"-| "%}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            {%csrf_token%}
+            {%if term_key == 'taxes'%}
+            <div class="alert alert-fill-info">Available formular keys: {{FORMULA_KEYS}}</div>
+            {%endif%}
+            {{form.as_p}}
+            {%for item in meta_keys%}
+            <div><label for="{{item.meta_key}}">{{item.meta_key|replace:"_| "}}</label>
+                <input id="{{item.meta_key}}" step="any" {%if item.type == 'checkbox' and item.value%}checked{%endif%} type="{{item.type}}" value="{%if item.type == 'checkbox'%}on{%else%}{{item.value}}{%endif%}" name="meta[{{item.meta_key}}]" {%if not item.no_class%}class="form-control"{%endif%}>
+            </div>
+            {%endfor%}
+        </div>
+        <div class="modal-footer text-right">
+            <button type="button" class="btn btn-warning modal-close" data-dismiss="modal">Close</button>
+            <button class="btn btn-flat btn-primary">Save</button>
+        </div>
+    </form>
+</div>

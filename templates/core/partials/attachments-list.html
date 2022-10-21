@@ -1,0 +1,40 @@
+{% load static i18n %}
+    <div class="view-account">
+        <section class="module">
+            <div class="module-inner">
+                <div class="content-panel">
+                    <div class="content-header-wrapper">
+                        <h2 class="title">Attachments list ({{list.count}})</h2>
+                        <div class="actions">
+                            <button hx-get="{%url 'attachments'%}?action=get-form&model_id={{model_id}}&model_name={{model_name}}" hx-target="#modal-dialog" class="pull-right btn btn-xs btn-primary">{%trans 'Add Attachment'%}</button>
+                        </div>
+                    </div>
+                    <div class="drive-wrapper drive-grid-view">
+                        <div class="grid-items-wrapper">
+                            {%for attachment in list%}
+                            <div class="drive-item module text-center">
+                                <div class="drive-item-inner module-inner">
+                                    <div class="drive-item-title"><a download="{{attachment.title}}" href="{{attachment.upload.url}}">{{attachment.title}}</a></div>
+                                    <div class="drive-item-thumb">
+                                        <a download="{{attachment.title}}" href="{{attachment.upload.url}}">{{attachment.thumbnail|safe}}</a>
+                                    </div>
+                                    <small><i class="fa fa-calendar"></i> {{ attachment.created_at|default_if_none:'' }}</small>
+                                </div>
+                                <div class="drive-item-footer module-footer">
+                                    <ul class="utilities d-flex flex-fill">
+                                        <li><a class="ml-1 mr-1" download="{{attachment.title}}" href="{{attachment.upload.url}}" title="{%trans 'Download'%}"><i class="fa fa-download"></i></a></li>
+                                        <li>
+                                            {%if 'projects.delete_attachment' in perms %}
+                    <a class="ml-4 text-danger" hx-delete="{%url 'attachment' attachment.id%}" hx-confirm="{%trans 'Do you want to delete this attachment?'%}" title="{%trans 'Delete'%}"><i class="text-danger fa fa-trash-o"></i></a>
+                    {%endif%}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {%endfor%}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>

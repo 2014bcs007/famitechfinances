@@ -1,0 +1,18 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags %}
+
+{% block head_title %}{% trans "Terms" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            {%include 'core/partials/terms-section.html'%}
+        </div>
+    </div>
+</div>
+
+{%endblock%}

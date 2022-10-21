@@ -1,0 +1,6 @@
+{% load static i18n %}
+<div class="table-responsive" hx-get="{%url 'transactions'%}?htmx=1&{{args}}" hx-trigger="listChanged from:body{%if not is_page%},load{%endif%}">
+    {%if is_page%}
+    {%include 'finances/partials/transactions-list.html'%}
+    {%endif%}
+</div>

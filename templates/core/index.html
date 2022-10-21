@@ -1,0 +1,200 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n %}
+
+{% block head_title %}{% trans "Config" %}{% endblock %}
+
+
+{%block content%}
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-3">
+                <ul class="nav nav-tabs nav-tabs-vertical" role="tablist">
+                    <li class="nav-item "><a class="nav-link  {%if tab == 'general' or tab == ''%}active {%endif%}"
+                            href="#general-tab" data-toggle="tab">{%trans 'General Settings'%}</a></li>
+                    {%for key,term in terms%}
+                    <li class="nav-item "><a class="nav-link {%if tab == key%}active {%endif%}" href="#{{key}}-tab"
+                            data-toggle="tab">{{term}}</a></li>
+                    {%endfor%}
+                    <li class="nav-item "><a class="nav-link  {%if tab == 'email'%} active {%endif%}" href="#email-tab" data-toggle="tab"><i
+                                class="fa fa-envelope"></i> Email</a></li>
+                    <li class="nav-item "><a class="nav-link {%if tab == 'templates'%} active {%endif%}" href="#templates-tab" data-toggle="tab"><i
+                                class="fa fa-bell"></i> Templates</a></li>
+                    <li class="nav-item"><a class="nav-link " href="#crons-tab" data-toggle="tab">Cron Jobs</a></li>
+                </ul>
+            </div>
+            <div class="col-9">
+                <div class="tab-content tab-content-vertical pt-1">
+                    <div class="tab-pane  {%if tab == 'general' or tab == ''%}active {%endif%}" id="general-tab">
+                        <form method="POST" action="{%url 'config'%}" enctype="multipart/form-data">
+                            {%csrf_token%}
+                            <div class="row form-group">
+                                <div class="col-md-6">
+                                    <label>{%trans 'Site Name'%}</label>
+                                    <input type="text" class="form-control" name="settings[site_name]" value="{{settings.site_name}}"/>
+                                    <label>{%trans 'Site URL'%}</label>
+                                    <input type="text" class="form-control" name="settings[site_url]" value="{{settings.site_url}}"/>
+                                    <label>{%trans 'Company Name'%}</label>
+                                    <input type="text" class="form-control" name="settings[company_name]" value="{{settings.company_name}}">
+                                    <label>{%trans 'Office (Location)'%}</label>
+                                    <input type="text" class="form-control" name="settings[office_location]" value="{{settings.office_location}}">
+                                    <div class="form-group"><label>{%trans 'Logo'%}</label>
+                                        <img src="{{APP_LOGO}}" alt="" style="max-height: 30px;">
+                                        <input class="form-control" name="company_logo" type="file" accept="image/*">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Favicon (<small>this logo will appear in the browser
+                                                title</small>)</label>
+                                        <img src="{{APP_FAVICON}}" alt="" style="max-height: 30px;">
+                                        <input class="form-control" name="company_favicon" type="file" accept="image/*">
+                                    </div>
+                                    <label>Company description</label>
+                                    <textarea class="form-control" name="settings[company_description]">{{settings.company_description}}</textarea>
+                                    <label>Recruitment Reason Options <small>[All comma seperated]</small></label>
+                                    <textarea class="form-control"
+                                        name="settings[recruitment_reason_options]">{{settings.recruitment_reason_options}}</textarea>
+                                    <label>Allowed Payees to appear on requisition <small>[All comma seperated]</small></label>
+                                    <textarea class="form-control" name="settings[allowed_payees]">{{settings.allowed_payees}}</textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Maximum individual annual leave days</label>
+                                    <input class="form-control" min="1" type="number" name="settings[individual_annual_leave_days]" value="{{settings.individual_annual_leave_days}}">
+                                    <div class="form-group">
+                                        <label>Default Asset Tag Prefix</label>
+                                        <input class="form-control" name="settings[asset_tag_prefix]" value="{{settings.asset_tag_prefix}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Payroll Tag Prefix</label>
+                                        <input class="form-control" name="settings[payroll_tag_prefix]" value="{{settings.payroll_tag_prefix}}">
+                                    </div>
+                                    <div class="form-group"><label>Default Depreciation type</label>
+                                        <select class="form-control" name="settings[default_depreciation_type]">
+                                            <option value=""></option>
+                                            <option value="Straightline" {%if settings.default_depreciation_type == 'Straightline'%} selected{%endif%}>Straightline</option>
+                                            <option value="Reducing balance" {%if settings.default_depreciation_type == 'Reducing balance'%} selected{%endif%}>Reducing balance</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Default License Tag Prefix</label>
+                                        <input class="form-control" type="text" name="settings[license_tag_prefix]" value="{{settings.license_tag_prefix}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Upload of asset attachments</label>
+                                        <select class="form-control" name="settings[upload_asset_attachments]">
+                                            <option value="Enabled" {%if settings.upload_asset_attachments == 'Enabled'%} selected{%endif%}>Enabled</option>
+                                            <option value="Disabled" {%if settings.upload_asset_attachments == 'Disabled'%} selected{%endif%}>Disabled</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Percentage Tax <small>[E.g 18]</small></label>
+                                        <input class="form-control" type="number" min="0" max="100" step="0.01" name="settings[percentage_tax]" value="{{settings.percentage_tax}}">
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-6"><label>Currency Symbol</label>
+                                            <input class="form-control" name="settings[currency_symbol]" value="{{settings.currency_symbol}}">
+                                        </div>
+                                        <div class="col-md-6"><label>Symbol Location</label>
+                                            <select class="form-control" name="settings[currency_symbol_location]">
+                                                <option value="Left" {%if settings.currency_symbol_location == 'Left'%} selected{%endif%}>Left</option>
+                                                <option value="Right" {%if settings.currency_symbol_location == 'Right'%} selected{%endif%}>Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Financial Year Starts Month</label>
+                                        <select class="form-control" name="settings[financial_year_start_month]">
+                                            {% for i in '012345678900'|make_list %}
+                                                <option value="{{ forloop.counter }}" {%if settings.financial_year_start_month == forloop.counter%} selected{%endif%}>{{ forloop.counter }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Single requisition total required quotations</label>
+                                        <input type="number" min="0" class="form-control" name="settings[requisition_total_quotations]" value="{{settings.requisition_total_quotations}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Save</button>
+                        </form>
+                    </div>
+                    {%for term,term_name in terms%}
+
+                    <div class="tab-pane  {%if tab == term%}active {%endif%}" id="{{term}}-tab"
+                        hx-get="{%url 'terms' term%}" hx-trigger="revealed">
+                        <!-- {%include 'core/partials/terms-section.html'%} -->
+                    </div>
+                    {%endfor%}
+                    <div class="tab-pane  {%if tab == 'email'%}active {%endif%}" id="email-tab">
+                        <form method="POST" action="{%url 'config'%}?tab=email" enctype="multipart/form-data">
+                            {%csrf_token%}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Email From Address</label>
+                                        <input class="form-control" type="text" name="settings[email_from_address]" value="{{settings.email_from_address}}">
+                                    </div>
+                                    <div class="form-group"><label>Emails From Name</label>
+                                        <input class="form-control" type="text" name="settings[email_from_name]" value="{{settings.email_from_name}}">
+                                        </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox"  {%if settings.email_smtp_enable == 'true'%} checked{%endif%} name="settings[email_smtp_enable]"> Enable SMTP</label>
+                                            </div>
+                                            <div class="form-group">
+                                        <label> <input type="checkbox" {%if settings.email_smtp_auth == 'true'%} checked{%endif%} name="settings[email_smtp_auth]"> SMTP Requires Authentication</label>
+                                            
+                                    </div>
+                                    <div class="form-group">
+                                        <label>SMTP Host</label>
+                                        <input class="form-control" type="text" name="settings[email_smtp_host]" value="{{settings.email_smtp_host}}">
+                                        </div>
+                                    <div class="form-group">
+                                        <label>SMTP Port</label>
+                                        <input class="form-control" type="text" name="settings[email_smtp_port]" value="{{settings.email_smtp_port}}">
+                                        </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>SMTP Username</label>
+                                        <input class="form-control" type="text" name="settings[email_smtp_username]" value="{{settings.email_smtp_username}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>SMTP Password</label>
+                                        <input class="form-control" type="password" name="settings[email_smtp_password]" value="{{settings.email_smtp_password}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>SMTP Security</label>
+                                        <select class="form-control" name="settings[email_smtp_security]">
+                                            <option value="">None</option>
+                                            <option value="ssl" {%if settings.email_smtp_security == 'ssl'%} selected{%endif%}>SSL</option>
+                                            <option value="tls" {%if settings.email_smtp_security == 'tls'%} selected{%endif%}>TLS</option>
+                                        </select></div>
+                                    <div class="form-group">
+                                        <label>SMTP Authentication Domain</label>
+                                        <input class="form-control" type="text" name="settings[email_smtp_domain]" value="{{settings.email_smtp_domain}}">
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="form-group"><button type="submit" class="btn btn-success btn-block"><i
+                                        class="fa fa-save"></i> Save Changes</button></div>
+                        </form>
+                    </div>
+                    <div class="tab-pane {%if tab == 'templates'%} active {%endif%}" id="templates-tab">
+                        <div class="alert alert-info"><i class="fa fa-info-circle"></i> To edit any template, just click
+                            on related button</div>
+                        <div class="text-center--">
+                            {%for template in templates%}
+                            <button hx-get="{%url 'template' template.code%}" hx-target="#modal-dialog" class="btn btn-outline-primary">{{template.title}}</button>
+                            {%endfor%}
+                        </div>
+                    </div>
+                    <div class="tab-pane " id="crons-tab"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

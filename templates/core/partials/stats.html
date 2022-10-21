@@ -1,0 +1,181 @@
+{% load static i18n custom_tags %}
+
+<div class="row">
+    <div class="col-md-12">
+        <header class="panel_header">
+            <h2 class="page-title pull-left">Dashboard</h2>
+            <div class="actions panel_actions pull-right">
+                <form class="input-group" hx-get="{%url 'stats'%}" hx-target="#home-stats-section">
+                    <select id="year_search" name="year" class="form-control">
+                        {%for y in YEARS%}<option value="{{y}}" {%if y == YEAR%}selected{%endif%}>{{y}}</option>{%endfor%}
+                    </select>
+                    <button class="btn btn-sm btn-success">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+    </div>
+</div>
+<div class="row">
+    {%for key,component in stats.items%}
+    <div class="col-md-3 col-sm-6 col-xs-12 stretch-card">
+        <div class="admin-content card analysis-progrebar-ctn res-mg-t-15">
+            <div class="text-left widget-thumb">
+                <div class="widget-thumb-wrap">
+                    <h5 class="card-title">{{key}}</h5>
+                    <div class="widget-thumb-body">
+                        {%for req in component%} <div>
+                            <span class="widget-thumb-subtitle">
+                                {{req.title}}: <span class="value">{{req.total}}</span>
+                                {%if req.link and req.link != ""%}<a href="{{req.link}}">View all <i
+                                        class="fa fa-angle-double-right"></i></a>{%endif%}
+                            </span>
+                            <hr />
+                        </div>{%endfor%}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {%endfor%}
+</div>
+
+<div class="row mt-4">
+    {%if assets or licenses %}
+    <div class="col-md-4 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Assets <small>({{assets.count}} latest)</small></h5>
+                <table class="table">
+                    <tbody>
+                        {%for asset in assets%}
+                        <tr>
+                            <td><i class="fa fa-barcode"></i>
+                                <a href="{{asset.get_url}}">{{asset.name}}</a>
+                                <br /><small>{{asset.model}}</small>
+                            </td>
+                            <td>{%if asset.category%} <span
+                                    class="btn btn-xs btn-outline-primary pull-right">{{asset.category}}</span>{%endif%}
+                            </td>
+                        </tr>
+                        {%endfor%}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Licenses <small>({{licenses.count}} latest)</small></h5>
+                <table class="table">
+                    <tbody>
+                        {%for license in licenses%}
+                        <tr>
+                            <td>
+                                <a>{{license.name}}</a>
+                                <br /><small>{{license.model}}</small>
+                            </td>
+                            <td>{%if license.category%} <span
+                                    class="btn btn-xs btn-outline-primary pull-right">{{license.category}}</span>{%endif%}
+                            </td>
+                        </tr>
+                        {%endfor%}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {%endif%}
+    {%for key,component in graphs.items%}
+    <div class="{{component.class}} grid-margin stretch-card">
+        <div class="card">
+            <div class="card-title">
+                <small>{%if component.icon%}<i class="{{component.icon}}"></i> {%endif%} {{component.title}}</small>
+            </div>
+            <canvas id="{{component.key}}"></canvas>
+            <div id="chart-legends{{component.key}}" class="chart-legendsproduct"></div>
+        </div>
+    </div>
+    {%endfor%}
+    {%for key,component in tables.items%}
+    <div class="{{component.class}} grid-margin stretch-card">
+        <div class="card">
+            <div class="card-title">
+                <small>{%if component.icon%}<i class="{{component.icon}}"></i> {%endif%} {{component.title}}</small>
+                {%if component.add_htmx_url or component.add_url%}
+                <a {%if component.add_htmx_url %} hx-get="{{component.add_htmx_url}}" hx-target="#modal-dialog" {%else%}
+                    href="{{component.add_url}}" {%endif%} class="btn btn-xs btn-primary pull-right">{%trans 'add'%}</a>
+                {%endif%}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            {%for key,val in component.data.0.items%}
+                            <th>{{key|replace:"_| "}}</th>
+                            {%endfor%}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {%for row in component.data%}
+                        <tr>
+                            {%for key,val in row.items%}
+                            <td>{{val}}</td>
+                            {%endfor%}
+                        </tr>
+                        {%endfor%}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {%endfor%}
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Calendar</h4>
+                <div id="calendar" class="full-calendar"></div>
+                <div class="modal fade" id="calendar-event" role="basic" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Event details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="fc-external-events">
+                                    <div>
+                                        <p class="text-muted mb-0 text-small" id="event-time"></p>
+                                        <p id="event-description"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-warning btn-xs" data-dismiss="modal"><i
+                                        class="fa fa-times"></i>
+                                    <?php _e('Close'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%block foot_js %}
+<script>
+    var graphs = {{ graphs| safe}};
+</script>
+<script src="{% static 'assets/js/dashboard.js'%}"></script>
+<script src="{%static 'assets/lib/moment/moment.min.js'%}"></script>
+<script src="{% static 'assets/lib/fullcalendar/fullcalendar.min.js'%}"></script>
+<script src="{% static 'assets/js/calendar.js'%}"></script>
+<script>
+    refreshCalendar();
+</script>
+{%endblock%}

@@ -1,0 +1,52 @@
+{%extends 'base.html'%}
+
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Home" %}{% endblock %}
+
+
+{%block content%}
+{%if request.user.is_employee%}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-topline-aqua">
+            <div class="card-head">
+                <header>Active Leaves</header>
+                <div class="pull-right">
+                    <a href="{%url 'employee-leaves'%}" class="btn btn-xs btn-success">View All</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {%if leaves%}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead><tr><th>Category</th><th>Start Date</th><th>Total Days</th><th>Ends on</th><th>Remaining</th></tr></thead>
+                        <tbody>
+                            {%for leave in leaves%}
+                                <tr>
+                                    <td>{{leave.category}}</td>
+                                    <td>{{leave.startdate}}</td>
+                                    <td>{{leave.days}}</td>
+                                    <td>{{leave.enddate}}</td>
+                                    <td>{{leave.remaining_days}}</td>
+                                </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+                {%else%}
+                    <div class="alert alert-danger">No active leaves</div>
+                {%endif%}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" hx-get="?template=hr/shifts/shift-section.html" hx-trigger="listChanged from:body">
+    {%include 'hr/shifts/shift-section.html'%}
+</div>
+{%else%}
+<div hx-get="{%url 'stats'%}" hx-trigger="load" id="home-stats-section">
+</div>
+{%endif%}
+{%endblock%}

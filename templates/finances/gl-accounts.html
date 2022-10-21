@@ -1,0 +1,27 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags %}
+
+{% block head_title %}{% trans "General Ledger Accounts" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <h5 class="card-title">{%trans 'General Ledger Accounts'%}
+                {%if 'add_chart_of_account' in perms%}<button hx-get="{%url 'gl-accounts'%}?action=get-form" hx-target="#modal-dialog" class="btn btn-primary ml-3">{%trans 'Add new'%}</button>{%endif%}
+            </h5>
+            <div class="card-body pl-0 pr-0 pt-0">
+                <div class="table-responsive" hx-get="{%url 'gl-accounts'%}?htmx=1" hx-trigger="listChanged from:body">
+                    
+                            {%include 'finances/partials/gl-accounts-list.html'%}
+                       
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

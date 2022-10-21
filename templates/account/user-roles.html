@@ -1,0 +1,25 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags %}
+
+{% block head_title %}{% trans "User Roles List" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <h5 class="card-title">{%trans 'User Roles List'%}
+                {%if request.user.is_superuser%}
+                <button hx-get="{%url 'user-roles'%}?htmx=1&action=get-form" hx-target=".card-body" class="btn btn-xs btn-primary ml-2">{%trans 'Add role'%}</button>
+                {%endif%}
+            </h5>
+            <div class="card-body pl-0 pr-0 pt-0" hx-get="{%url 'user-roles'%}?htmx=1" hx-trigger="userListChanged from:body">
+                {%include 'account/partials/user-roles-section.html'%}
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

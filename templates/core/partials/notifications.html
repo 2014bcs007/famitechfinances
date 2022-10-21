@@ -1,0 +1,24 @@
+{% load static i18n custom_tags %}
+{%if list%}
+    {%for item in list%}
+    <div class="notification" style="max-height: 60vh;">
+        {%if target_model == "Item"%}
+            <div class="notification__card">
+                <Labels labels={target.labels} />
+                <p>{{target.title}}</p>
+            </div>
+        {%endif%}
+        <div class="notification__header">
+            <p class="notification__name">{{item.actor.name}}</p>
+            <p class="notification__subtitle">{{item.created_at}}</p>
+        </div>
+
+        <p class="notification__text">
+            <i class={iconMap[verb]}></i>{{item}}</p>
+    </div>
+    {%endfor%}
+{%else%}
+<div class="label-modal__no-notif"><img src="{% static 'img/nonotif.svg'%}">
+    <p>No Notifications</p>
+</div>
+{%endif%}

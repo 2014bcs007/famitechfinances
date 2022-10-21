@@ -1,0 +1,37 @@
+{% load static i18n %}
+{%if list%}
+<div class="table table-responsive">
+    <table class="table table-striped" data-toggle="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Logo</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Box Number</th>
+                <th>Currency Symbol</th>
+                <th>Symbol Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%for client in list%}
+            <tr>
+                <td><a href="{{ client.get_url }}">{{ client.name|default_if_none:'' }}</a></td>
+                <th>{%if client.logo%}<img style="height: 30px;" src="{{client.logo.url}}" alt="">{%endif%}</th>
+                <td>{{ client.email }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.box_number|default_if_none:"" }}</td>
+                <td>{{client.currency_symbol}}</td>
+                <td>{{client.get_currency_location_display}}</td>
+                <td>
+                    <a hx-get="{{client.get_url}}?action=get-form" hx-target="#modal-dialog" class="fa fa-pencil"></a>
+                </td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+</div>
+{%else%}
+<div class="alert alert-danger">No clients registered</div>
+{%endif%}

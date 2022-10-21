@@ -1,0 +1,23 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags crispy_forms_tags %}
+
+{% block head_title %}{% trans "Clients List" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card card-body">
+            <div class="card-title">Clients List
+                <button hx-get="{%url 'clients'%}?action=get-form" hx-target="#modal-dialog" class="btn btn-xs btn-primary">Add new</button>
+            </div>
+            <div class="card-body" hx-get="{%url 'clients'%}" hx-trigger="clientsListChanged from:body">
+            {%include 'core/partials/clients-list.html'%}
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

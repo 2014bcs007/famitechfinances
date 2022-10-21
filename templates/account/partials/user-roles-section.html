@@ -1,0 +1,17 @@
+{%if list%}
+<div class="table-responsive">
+    <table class="table table-striped" data-toggle="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Permissions</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%include 'account/partials/user-roles-list.html'%}
+        </tbody>
+    </table>
+</div>
+{%endif%}

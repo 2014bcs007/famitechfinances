@@ -1,0 +1,45 @@
+
+{% load static i18n custom_tags %}
+<table class="table table-striped" data-toggle="table">
+    <!-- <table class="table table-striped" id="order-listing"> -->
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Actions</th>
+            {%for key,val in list.0.items%}
+            {%if key != 'id'%}<th>{%trans key|replace:"_| "|capfirst%}</th>{%endif%}
+            {%endfor%}
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for user in list%}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td><a hx-get="{%url 'user' user.id%}?htmx=1&display=modal" hx-target="#modal-dialog-lg" class="fa fa-eye text-primary"></a>
+                {%if 'users.change_user' in perms%}
+                    <a hx-get="{%url 'user' user.id%}?htmx=1&action=get-form" hx-target="#modal-dialog" class="ml-1 text-primary fa fa-pencil"></a>
+                    {%endif%}
+                {%if 'users.change_user' in perms%}
+                <a hx-delete="{%url 'user' user.id%}" hx-target="body" hx-confirm="You are almost deleting this user" class="ml-1 text-danger fa fa-trash"></a>
+                {%endif%}</td>
+            {%for key,val in user.items%}
+            {%if key != 'id'%}
+            <td>{%if val == True or val == False%}<i
+                    class="fa {%if val == True%}fa-check-circle text-success{%else%}fa-times-circle text-danger{%endif%}"></i>{%else%}{{val|default_if_none:''}}{%endif%}
+            </td>
+            {%endif%}
+            {%endfor%}
+            <td>
+        <a hx-get="{%url 'user' user.id%}?htmx=1&display=modal" hx-target="#modal-dialog-lg" class="fa fa-eye text-primary"></a>
+        {%if 'users.change_user' in perms%}
+            <a hx-get="{%url 'user' user.id%}?htmx=1&action=get-form" hx-target="#modal-dialog" class="ml-1 text-primary fa fa-pencil"></a>
+            {%endif%}
+        {%if 'users.change_user' in perms%}
+        <a hx-delete="{%url 'user' user.id%}" hx-target="body" hx-confirm="You are almost deleting this user" class="ml-1 text-danger fa fa-trash"></a>
+        {%endif%}
+    </td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>

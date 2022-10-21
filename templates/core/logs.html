@@ -1,0 +1,38 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n custom_tags crispy_forms_tags %}
+
+{% block head_title %}{% trans "Logs" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card card-body">
+            <div class="card-title">Logs</div>
+            {% if filters%}
+            <div class="row p-1">
+                <button class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Filter search
+                    <i class="fa fa-filter"></i>
+                </button>
+                <ul class="dropdown-menu always-open" style="margin-right: 10px;">
+                    <form method="GET">
+                        <div class="row m-1">
+                            {%for field in filters.form%}
+                            <div class="col-md-3">{{field|as_crispy_field}}</div>
+                            {%endfor%}
+                            <div class="col-md-3"><br />
+                                <button class="btn btn-success"><i class="fa fa-filter"></i> Filter</button>
+                            </div>
+                        </div>
+                    </form>
+                </ul>
+            </div>
+            {%endif%}
+            {%include 'core/partials/logs-list.html' with logs=list%}
+        </div>
+    </div>
+</div>
+
+{%endblock%}

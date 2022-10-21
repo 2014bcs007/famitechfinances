@@ -1,0 +1,33 @@
+{% load static i18n %}
+<div class="col-md-12">
+    {%if logs%}
+        <div class="table table-responsive">
+            <table class="table table-striped" data-toggle="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Time</th>
+                        <th>Action Flag</th>
+                        <th>Content Type</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for log in logs%}
+                        <tr class="{%if log.get_action_flag_display == 'Deletion'%}bg-danger{%endif%}">
+                            <td>{{forloop.counter}}</td>
+                            <td>{{ log.user.name|default_if_none:'' }}</td>
+                            <td>{{ log.action_time }}</td>
+                            <td>{{ log.get_action_flag_display }}</td>
+                            <td>{{ log.content_type|default_if_none:"" }}</td>
+                            <td>{{log.change_message}}</td>
+                        </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+    {%else%}
+        <div class="alert alert-danger">No logs available</div>
+    {%endif%}
+</div>

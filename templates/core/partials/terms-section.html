@@ -1,0 +1,38 @@
+{% load static i18n custom_tags%}
+<div class="card-body" {%if term_key%}hx-get="{%url 'terms' term_key%}?htmx=1"{%endif%} hx-trigger="listChanged from:body">
+    <div class="card-title">{{term_key|replace:"-| "}} ({{items.count}}){%if term_key%}<a hx-get="{%url 'terms' term_key%}?htmx=1&action=get-form" hx-target="#modal-dialog" class="btn btn-primary btn-xs ml-3">Add new</a>{%endif%}
+    </div>
+    {%if items%}
+    <div class="table-responsive">
+        <table class="table table-striped" data-toggle="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    {%for item in meta_keys%}
+                        <th>{{item.meta_key|replace:"_| "}}</th>
+                    {%endfor%}
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for t in items%}
+                <tr>
+                    <td>{{t.name}}</td>
+                    <td>{{t.description}}</td>
+                    {%for item in meta_keys%}
+                        <td>
+                            {%for key,val in t.get_meta.items%}{%if key == item.meta_key%}{{val}} {%endif%} {%endfor%}
+                        </td>
+                    {%endfor%}
+                    <td><button hx-get="{%url 'term' t.id%}?htmx=1&action=get-form" hx-target="#modal-dialog" class="btn btn-primary btn-xs">{%trans 'edit'%}</button></td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+    {%else%}
+        <div class="alert alert-danger">No {{term_key}} registered</div>
+    {%endif%}
+</div>
+<!-- <script>;$('[data-toggle="table"]').DataTable();</script> -->
