@@ -5,6 +5,8 @@ from core.models import Term
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 import datetime
+from core.models import *
+from core.fields import RelatedFieldWidgetCanAdd
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Div
@@ -65,7 +67,9 @@ class TransactionForm(forms.ModelForm):
             'transaction_code':forms.HiddenInput(),
             'date':forms.DateInput(attrs={'class':'form-control','type':'date'}),
             'amount':forms.NumberInput(attrs={'class':'form-control','type':'number','min':0}),
-            'comment':forms.Textarea(attrs={'class':'form-control','rows':3})
+            'comment':forms.Textarea(attrs={'class':'form-control','rows':3}),
+            'client':RelatedFieldWidgetCanAdd(Client,attrs={'class':'form-control'}),
+            'gl_account':RelatedFieldWidgetCanAdd(ChartOfAccount,attrs={'class':'form-control'}),
         }
 
     # Validate amount submitted
@@ -74,3 +78,52 @@ class TransactionForm(forms.ModelForm):
         if amount<=0:
             raise forms.ValidationError("Cannot make a Zero amount transaction")
         return amount
+
+
+class InvoiceForm(forms.ModelForm):
+    allFields=['date','invoice_number','invoice_type','due_days','is_credited','is_credit_for','discount_amount','description','client']
+
+    def __init__(self, *args, **kwargs):
+        super(InvoiceForm, self).__init__(*args, **kwargs)
+        if 'date'in self.fields:self.fields['date'].required = True
+        if 'amount'in self.fields:self.fields['amount'].required = True
+
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Div(
+                *self.allFields, css_class='mb-3 form-inline'
+            ),
+        )
+    class Meta:
+        model=Invoice
+        fields='__all__'
+        widgets={
+            'invoice_type':forms.HiddenInput(),
+            'invoice_number':forms.HiddenInput(),
+            'date':forms.DateInput(attrs={'class':'form-control','type':'date'}),
+            'discount_amount':forms.NumberInput(attrs={'class':'form-control','type':'number','min':0}),
+            'description':forms.TextInput(attrs={'class':'form-control','rows':1}),
+            'client':RelatedFieldWidgetCanAdd(Client,attrs={'class':'form-control'}),
+        }
+
+    # Validate discount amount submitted
+    def clean_discount_amount(self):
+        amount = self.cleaned_data.get('discount_amount',None)
+        if amount<0:
+            raise forms.ValidationError("Cannot make a qoute with lessa than zero discount amount")
+        return amount
+    
+class ItemForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        if 'quantity' in self.fields:self.fields['quantity'].required=True
+    class Meta:
+        model=Item
+        fields=['quantity','unit_price','description']
+        # exclude=['purchase_order','budgetlineitem','quotation','parent']
+        widgets={
+                'quantity':forms.NumberInput(attrs={'class':'form-control','oninput':'validateFields(this)','required':True,'min':'0'}),
+                'unit_price':forms.NumberInput(attrs={'class':'form-control','oninput':'validateFields(this)','required':True,'min':'0'}),
+                'description':forms.TextInput(attrs={'class':'form-control'})
+            }

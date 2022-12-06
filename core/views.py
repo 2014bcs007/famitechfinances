@@ -43,9 +43,9 @@ class HomeView(LoginRequiredMixin,View):
             context={
                 'shift':shift,
             }
-            if request.user.is_employee:
-                leaves=EmployeeLeave.objects.filter(employee=request.user,is_active=True,status=1)
-                context['leaves']=leaves
+            # if request.user.is_employee:
+            #     leaves=EmployeeLeave.objects.filter(employee=request.user,is_active=True,status=1)
+            #     context['leaves']=leaves
         if request.htmx:
             self.template_name=request.GET.get('template',self.template_name)
         return render(request, self.template_name,context)
@@ -254,18 +254,18 @@ class TermDetail(View):
 class EventsList(View):
     def get(self,request):
         records = []
-        leaves=EmployeeLeave.objects.filter(status=1)
-        if request.user.is_client:
-            leaves=leaves.filter(employee__client=request.user)
-        elif not request.user.is_superuser:
-            leaves=leaves.filter(employee=request.user) 
-        for leave in leaves:
-            records.append({"title":"%s"%(leave.category),'color':'green','type':'leave','description':"%s: %s"%(leave.employee,leave.reason), "id":leave.id,"date":str(leave.startdate),'end':str(leave.enddate)})
-        tasks = Task.objects.filter()
-        for task in tasks:
-            records.append(
-                {"title":task.title,'type':'task', "id":task.id,"date":str(task.employee_shift.date),'end':str(task.employee_shift.date),'task':''}
-                )
+        # leaves=EmployeeLeave.objects.filter(status=1)
+        # if request.user.is_client:
+        #     leaves=leaves.filter(employee__client=request.user)
+        # elif not request.user.is_superuser:
+        #     leaves=leaves.filter(employee=request.user) 
+        # for leave in leaves:
+        #     records.append({"title":"%s"%(leave.category),'color':'green','type':'leave','description':"%s: %s"%(leave.employee,leave.reason), "id":leave.id,"date":str(leave.startdate),'end':str(leave.enddate)})
+        # tasks = Task.objects.filter()
+        # for task in tasks:
+        #     records.append(
+        #         {"title":task.title,'type':'task', "id":task.id,"date":str(task.employee_shift.date),'end':str(task.employee_shift.date),'task':''}
+        #         )
         return HttpResponse(json.dumps(records))
     
     def post(self,request):

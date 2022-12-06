@@ -145,6 +145,16 @@ SidebarData = [
         ]
     },
     {
+        "title": "Quotes",
+        "path": "#",
+        "icon": "fa fa-wrench",
+        "permissions": "finances.view_invoice",
+        "subNav": [
+            { "title": "Add Quote",'hx_target':'#modal-dialog-lg', "hx_path": "%s?invoice_type=quote&action=get-form"%(reverse("invoices")), "icon": "fa fa-pencil","permissions": "finances.add_invoice", },
+            { "title": "List Quotes", "path": "%s?invoice_type=quote"%(reverse("invoices")), "icon": "fa fa-user","permissions": "finances.view_invoice", },
+        ]
+    },
+    {
         "title": "Income",
         "path": "#",
         "icon": "fa fa-dollar",

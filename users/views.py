@@ -117,9 +117,9 @@ class UsersView(PermissionRequiredMixin,View):
             users=users.filter(is_active=status).exclude(id__in=[request.user.id])
         users=self.filter_class(request.GET,users).qs
         # users=users.defer('password')
-        values_list=['id','first_name','last_name','username','email','is_active','is_superuser','department__name','phone','designation','dob','gender','date_joined','last_login','nin','marital_status']
+        values_list=['id','first_name','last_name','username','email','is_active','is_superuser','department__name','phone','designation','dob','gender','nin','marital_status']
         if display=='summary':
-            values_list=['id','first_name','last_name','email','is_active','is_superuser','department__name','phone','date_joined','last_login']
+            values_list=['id','first_name','last_name','email','is_active','is_superuser','department__name','phone']
         context['users']=users
         context['list']=users.values(*values_list)
         if request.htmx:

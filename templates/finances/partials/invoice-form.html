@@ -1,0 +1,108 @@
+{% load static i18n crispy_forms_tags %}
+<div class="modal-content">
+    <form hx-post="{%if invoice%}{{invoice.get_url}}{%else%}{%url 'invoices'%}{%endif%}" hx-encoding="multipart/form-data">
+        <div class="modal-header">
+            <h5 class="modal-title">{%trans 'Invoice Form'%}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            {%csrf_token%}
+            {%if form%}{%crispy form%}{%endif%}
+            <div class="text-danger">
+                {% for formset in formsets.forms %}
+                    {{ formset.non_field_errors.as_ul }}
+                {% endfor %}
+            </div>
+            {{formsets.management_form}}
+            <div class="table-responsive">
+                <table id="formset" class="form table table-bordered requisition-items-formset">
+                    {% for form in formsets.forms %}
+                    {% if forloop.first %}
+                    <thead>
+                        <tr>
+                            {% for field in form.visible_fields %}
+                            <th>
+
+                                {{ field.label|capfirst }}
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    {% endif %}
+                    <tbody id="model-form-items">
+                        <tr class="{% cycle row1 row2 %} formset_row">
+                            {% for field in form.visible_fields %}
+                            <td>
+                                <!-- {# Include the hidden fields in the form #} -->
+                                {% if forloop.first %}
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                {% endif %}
+                                {{ field.errors.as_ul }}
+                                {{ field }}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {%if append_attachments%}
+                <h5>Attachments</h5>
+                <input type="file" name="attachments" multiple>
+                {%endif%}
+            </div>
+            <div class="invalid-form"></div>
+        </div>
+        <div class="modal-footer text-right">
+            <button type="button" class="btn btn-warning modal-close" data-dismiss="modal">Close</button>
+            <button class="btn btn-flat btn-primary">Save</button>
+        </div>
+    </form>
+</div>
+
+{%if formsets%}
+{%block foot_js%}
+<script>
+
+
+    $('.formset_row').formset({
+        addText: 'add item',
+        deleteText: 'remove',
+        prefix: 'invoice_items',
+        deleteCssClass:'btn btn-xs btn-danger btn-delete-invoice-item',
+        addCssClass:'btn btn-primary btn-xs btn-add-invoice-item',
+        "added":validateFields,
+        "removed":validateFields,
+        'formTemplate':$('#item-clone').html()
+    });
+
+    // $('.btn-delete-requisition-item,.btn-add-requisition-item').on('click', function (e) {
+    //     validateFields(this);
+    // });
+    function validateFields(elm){
+        var qtz=$(elm.closest('form')).find("input[name$='quantity']");
+        var unit_prices=$(elm.closest('form')).find("input[name$='unit_price']"),valid=true,index=0;
+        while(valid && index<qtz.length){
+            var qty=$(qtz[index]).val(),unit_price=$(unit_prices[index]).val()
+            if(qty <= 0 ||unit_price<=0){
+                valid=false;
+                break;
+            }
+            index++;
+        }
+        if (qtz.length<=0){valid=false;}
+        if(valid){
+            $(elm.closest('form')).find("button[type=submit]").removeAttr('disabled');
+            $(elm.closest('form')).find("div.invalid-form").html("")
+        }else{
+            $(elm.closest('form')).find("div.invalid-form").html("<div class='alert alert-danger'>Cannot submit form with item/items empty</div>")
+            $(elm.closest('form')).find("button[type=submit]").attr({ 'disabled': true });
+        }
+    }
+</script>
+
+{%endblock%}
+{%endif%}

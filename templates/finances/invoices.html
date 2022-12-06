@@ -1,0 +1,24 @@
+{%extends 'base.html'%}
+
+
+{% load static i18n %}
+
+{% block head_title %}{% trans "Invoices" %}{% endblock %}
+
+
+{%block content%}
+<div class="row">
+    <div class="col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <h5 class="card-title">{%trans 'Invoices'%}
+            </h5>
+            <div class="card-body pl-0 pr-0 pt-0">
+                <div class="table-responsive">
+                    {%include 'finances/partials/invoices-section.html' with is_page=True%}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

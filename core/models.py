@@ -25,10 +25,10 @@ class RightsSupport(models.Model):
 class BaseModel(models.Model):
     created_by = CurrentUserField(editable=False,related_name="%(app_label)s_%(class)s_created_by",
         related_query_name="%(app_label)s_%(class)ss")
-    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_by = CurrentUserField(on_update=True,related_name="%(app_label)s_%(class)s_updated_by",
         related_query_name="%(app_label)s_%(class)ss",verbose_name='last updated by')
-    updated_at = models.DateTimeField(null=True,blank=True, editable=False,verbose_name='last updated on')
+    updated_at = models.DateTimeField(auto_now=True,null=True,blank=True, editable=False,verbose_name='last updated on')
 
     class Meta:
         abstract=True
@@ -119,9 +119,13 @@ class Client(models.Model):
     locations=(("right","Right"),("left","Left"))
     name=models.CharField(max_length=255,null=False,blank=False)
     email=models.CharField(max_length=255,null=False,blank=False,unique=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    zipcode = models.CharField(max_length=255, blank=True, null=True)
+    client_contact_reference = models.CharField(max_length=255, blank=True, null=True)
     phone=models.CharField(max_length=255,null=True,blank=True)
     box_number=models.CharField(max_length=255,null=True,blank=True)
-    address=models.TextField(blank=True,null=True)
+    # address=models.TextField(blank=True,null=True)
     logo=models.ImageField(null=True,blank=True,upload_to="clients/logos")
     currency_symbol=models.CharField(max_length=255,null=True,blank=True)
     currency_location=models.CharField(max_length=10,choices=locations,default=locations[0])

@@ -36,7 +36,7 @@ class ClientForm(forms.ModelForm):
 
     create_client_folder=forms.BooleanField(required=False)
     col1_fields=['name','email','phone','box_number']
-    col2_fields=['currency_location','currency_symbol','address']
+    col2_fields=['currency_location','currency_symbol','address1','address2']
     row2_fields=['logo']
 
     def __init__(self, *args, **kwargs):
@@ -58,7 +58,8 @@ class ClientForm(forms.ModelForm):
         model=Client
         fields='__all__'
         widgets={
-            'address':forms.Textarea(attrs={'rows':3}),
+            'address1':forms.Textarea(attrs={'rows':3}),
+            'address2':forms.Textarea(attrs={'rows':3}),
             'password':forms.PasswordInput(),
         }
 
@@ -70,9 +71,3 @@ class ClientForm(forms.ModelForm):
                 from django.contrib.auth.hashers import make_password
                 instance.password=make_password(password)
         instance.save()
-
-# class ClientPasswordResetForm(ResetPasswordKeyForm):
-#     def __init__(self, *args, **kwargs):
-#         super(CustomResetPasswordKeyForm, self).__init__(*args, **kwargs)
-#         if 'password1' in self.fields:self.fields['password1'].widget = forms.PasswordInput(attrs={'class': 'form-control form-control-lg-'})
-#         if 'password2' in self.fields:self.fields['password2'].widget = forms.PasswordInput(attrs={'class': 'form-control form-control-lg-'})

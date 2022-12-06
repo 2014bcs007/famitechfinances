@@ -129,7 +129,7 @@
                             {%if menu.permissions in perms or not menu.permissions%}
                                 {%if menu.module == MODULE or not menu.module%}
                                 <li class="nav-item">
-                                    <a {%if menu.path%} href="{{menu.path}}"{%elif menu.hx_path%} hx-get="{{menu.hx_path}}" hx-target="#modal-dialog"{%endif%} class="nav-link {%if menu.subNav%} nav-toggle{%endif%}"> 
+                                    <a {%if menu.path%} href="{{menu.path}}"{%elif menu.hx_path%} hx-get="{{menu.hx_path}}" hx-target="{%if menu.hx_target%}{{menu.hx_target}}{%else%}#modal-dialog{%endif%}"{%endif%} class="nav-link {%if menu.subNav%} nav-toggle{%endif%}"> 
                                         <i class="{{menu.icon}}"></i>
                                     <span class="title">{{menu.title}}</span> {%if menu.subNav%}<span class="arrow "></span>{%endif%}
                                     </a>
@@ -137,7 +137,7 @@
                                     <ul class="sub-menu">
                                         {%for submenu in menu.subNav%}
                                             {%if submenu.permission in perms or not submenu.permission%}
-                                            <li><a class="nav-item" {%if submenu.path%} href="{{submenu.path}}"{%elif submenu.hx_path%} hx-get="{{submenu.hx_path}}" hx-target="#modal-dialog"{%endif%}>{{submenu.title}}</a></li>
+                                            <li><a class="nav-item" {%if submenu.path%} href="{{submenu.path}}"{%elif submenu.hx_path%} hx-get="{{submenu.hx_path}}" hx-target="{%if submenu.hx_target%}{{submenu.hx_target}}{%else%}#modal-dialog{%endif%}"{%endif%}>{{submenu.title}}</a></li>
                                             {%endif%}
                                         {%endfor%}
                                     </ul>
@@ -189,13 +189,14 @@
             logoutLink = '{%url "account_logout"%}',
             iddle_after = (60 * 5),
         events_url="{%url 'events'%}?";
-        function ReloadPage(form_id) {
-            //$("#" + form_id).submit();
-        }
-        var payrollArrayData = [{ "year": "2022", "short_month": "Jan", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Feb", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Mar", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Apr", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "May", "paye": "1132000", "employee_nssf": "410000", "employer_nssf": "205000" }, { "year": "2022", "short_month": "Jun", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Jul", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Aug", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Sep", "paye": "322000", "employee_nssf": "140000", "employer_nssf": "70000" }, { "year": "2022", "short_month": "Oct", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Nov", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }, { "year": "2022", "short_month": "Dec", "paye": "0", "employee_nssf": "0", "employer_nssf": "0" }];
-            //var MonthlypatientsArrayData = null;
-            //var DeathOccuranceArrayData = null;
     </script>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+	<script type="text/javascript" src="{% static 'admin/js/core.js'%}"></script>
+	<script type="text/javascript" src="{% static 'admin/js/admin/RelatedObjectLookups.js'%}"> </script>
+	<script type="text/javascript" src="{% static 'admin/js/jquery.js'%}"></script>
+	<script type="text/javascript" src="{% static 'admin/js/jquery.init.js'%}"></script>
+
+    
     <script src="{% static 'assets/js/jquery.min.js'%}" type="text/javascript"></script>
     <script src="{% static 'assets/js/bootstrap/js/bootstrap.min.js'%}" type="text/javascript"></script>
     <script src="{% static 'assets/js/jquery.blockui.min.js'%}" type="text/javascript"></script>
@@ -223,6 +224,7 @@
     <script type="text/javascript" src="{% static 'assets/lib/datatables.net/datatables.select.min.js'%}"></script>
     <script type="text/javascript" src="{% static 'assets/lib/datatables.net/datatables.colReorder.min.js'%}"></script>
 
+    <script src="{% static 'assets/js/dynamic-formsets.js'%}" type="text/javascript"></script>
     <script src="{% static 'assets/js/table_data.js'%}" type="text/javascript"></script>
     <script src="{% static 'assets/js/select2/js/select2.js'%}" type="text/javascript"></script>
     <script src="{% static 'assets/js/select2/js/select2-init.js'%}" type="text/javascript"></script>

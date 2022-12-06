@@ -16,3 +16,8 @@ class TransactionsFilter(django_filters.FilterSet):
         model=Transaction
         # fields=['till_session','till','date','till_session__teller','target_model__model','target_id','branch']
         exclude=['is_active','created_by']
+
+class InvoicesFilter(django_filters.FilterSet):
+    class Meta:
+        model=Invoice
+        exclude=['is_active','created_by']
