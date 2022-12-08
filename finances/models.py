@@ -5,6 +5,7 @@ from django.conf import settings
 from core.models import BaseModel
 from django.shortcuts import reverse
 import decimal
+from datetime import timedelta
 
 # Create your models here.
 
@@ -49,7 +50,7 @@ class Transaction (BaseModel):
 class Invoice(BaseModel):
     INVOICE = 'invoice'
     CREDIT_NOTE = 'credit_note'
-    QUOTE='qoute'
+    QUOTE='quote'
 
     CHOICES_TYPE = (
         (INVOICE, 'Invoice'),
@@ -91,21 +92,21 @@ class Invoice(BaseModel):
     def get_url(self):
         return reverse("invoice",kwargs={'pk':self.pk})
     
-    def save(self, *args, **kwargs):
-        try:
-            disc=0
-            net=0
-            gross=0
-            for i in self.items.all():
-                disc+=i.discount
-                net=(i.quantity*i.unit_price)-i.discount
-                gross=i.quantity*i.unit_price
-            if not self.discount_amount:
-                self.discount_amount=disc
-            self.net_amount=net
-            self.gross_amount=gross
-        except:
-            print("Exception occured")
+    # def save_(self, *args, **kwargs):
+    #     try:
+    #         disc=0
+    #         net=0
+    #         gross=0
+    #         for i in self.items.all():
+    #             disc+=i.discount
+    #             net=(i.quantity*i.unit_price)-i.discount
+    #             gross=i.quantity*i.unit_price
+    #         if not self.discount_amount:
+    #             self.discount_amount=disc
+    #         self.net_amount=net
+    #         self.gross_amount=gross
+    #     except:
+    #         print("Exception occured")
         # self.contact_person = Employee.objects.filter(sections__in=[self.section],client=self.client).first()
 
 class Item(BaseModel):
@@ -117,9 +118,9 @@ class Item(BaseModel):
     discount = models.FloatField(default=0)
     description=models.TextField(null=True,blank=True)
 
-    # def save(self, *args, **kwargs):
-    #     self.net_amount=(self.quantity*self.unit_price)-self.discount
+    def save(self, *args, **kwargs):
+        self.net_amount=(self.quantity*self.unit_price)-self.discount
 
     def get_gross_amount(self):
         vat_rate = self.vat_rate/100
-        return self.net_amount + (self.net_amount * vat_rate)
+        return ((self.quantity*self.unit_price)-self.discount) + (((self.quantity*self.unit_price)-self.discount) * vat_rate)

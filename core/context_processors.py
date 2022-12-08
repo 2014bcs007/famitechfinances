@@ -34,7 +34,7 @@ def core_configurations(request):
 
     return {
         "BASE_URL":BASE_URL,
-        "APP_NAME": app_name.value if app_name else "Intranet",
+        "APP_NAME": app_name.value if app_name else "eFinance",
         "COMPANY_NAME": company_name.value if company_name else '',
         "COMPANY_DESCRIPTION": company_description.value if company_description else '',
         "ADDRESS": address.value if address else '',

@@ -204,9 +204,11 @@ class UserDetailView(LoginRequiredMixin,View):
             form =AddUserForm(request.POST,request.FILES,instance=user,initial={'pop-password':True})
             if form.is_valid():
                 form.save()
+                print("User saved")
                 # save_log("%s changed data for for %s"%(request.user,user))
                 return HttpResponse(status=204,headers={'HX-Trigger':'userListChanged'})
             else:
+                print(form.errors)
                 context['form']=form
                 self.template_name="account/partials/user-form.html"
         return render(request, self.template_name,context)

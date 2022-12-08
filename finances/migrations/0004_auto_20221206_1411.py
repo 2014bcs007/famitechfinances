@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True, null=True, verbose_name='last updated on')),
                 ('invoice_number', models.CharField(blank=True, max_length=255, null=True)),
                 ('sender_reference', models.CharField(blank=True, max_length=255, null=True)),
-                ('invoice_type', models.CharField(choices=[('invoice', 'Invoice'), ('credit_note', 'Credit note'), ('qoute', 'Quote')], default='invoice', max_length=20)),
+                ('invoice_type', models.CharField(choices=[('invoice', 'Invoice'), ('credit_note', 'Credit note'), ('quote', 'Quote')], default='invoice', max_length=20)),
                 ('due_days', models.IntegerField(default=14)),
                 ('is_credited', models.BooleanField(default=False)),
                 ('is_sent', models.BooleanField(default=False)),

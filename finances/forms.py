@@ -111,7 +111,7 @@ class InvoiceForm(forms.ModelForm):
     def clean_discount_amount(self):
         amount = self.cleaned_data.get('discount_amount',None)
         if amount<0:
-            raise forms.ValidationError("Cannot make a qoute with lessa than zero discount amount")
+            raise forms.ValidationError("Cannot make a quote with lessa than zero discount amount")
         return amount
     
 class ItemForm(forms.ModelForm):

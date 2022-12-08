@@ -184,6 +184,7 @@ class InvoicesView(LoginRequiredMixin,View):
                     'content_type':request.GET.get('content_type',None),
                     'account_type':request.GET.get('account_type',None),
                 }
+                print(request.GET.get('invoice_type',None))
                 return render(request, self.template_name,context)
 
         queryset= self.model_class.objects.filter(is_active=True)
@@ -205,7 +206,7 @@ class InvoicesView(LoginRequiredMixin,View):
                 self.template_name='finances/partials/invoice-form.html'
                 print(formsets.errors)
                 return render(request, self.template_name,context)
-            req=form.save()
+            req=form.save(commit=True)
 
             formsets=self.itemFormsets(request.POST,instance=req)
             context['formsets']=formsets
@@ -225,7 +226,7 @@ class InvoiceDetailView(LoginRequiredMixin,View):
     form_class=InvoiceForm
     child_model_class=Item
     child_form_class=ItemForm
-    template_name='finances/invoices.html'
+    template_name='finances/partials/invoice.html'
 
     itemFormsets = inlineformset_factory(model_class, child_model_class,extra=1,
             form=ItemForm,

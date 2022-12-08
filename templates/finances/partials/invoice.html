@@ -1,0 +1,284 @@
+{% load static i18n crispy_forms_tags custom_tags %}
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title">#{{invoice.invoice_number}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="modal-body" id="invoiceSection">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+    
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                font-family: Arial;
+            }
+    
+            body {
+                padding: 30px;
+            }
+    
+            .top {
+                font-size: 0;
+            }
+    
+            .top-left {
+                width: 50%;
+                font-size: 16px;
+                display: inline-block;
+                vertical-align: top;
+            }
+    
+            .top-left .client {
+                margin-top: 40px;
+                margin-left: 40px;
+            }
+    
+            .top-right {
+                width: 50%;
+                font-size: 16px;
+                display: inline-block;
+                vertical-align: top;
+            }
+    
+            .top-right h2 {
+                margin-bottom: 20px;
+            }
+    
+            .top-right .split {
+                font-size: 0;
+            }
+    
+            .top-right .split .split-left,
+            .top-right .split .split-right {
+                width: 40%;
+                display: inline-block;
+                vertical-align: top;
+                font-size: 16px;
+            }
+    
+            .top-right .split .split-right {
+                width: 60%;
+            }
+    
+            .items {
+                margin-top: 10px;
+            }
+    
+            .items .items-row {
+                font-size: 0;
+            }
+    
+            .items .items-row .items-row-cell {
+                padding: 6px 14px;
+                display: inline-block;
+                vertical-align: top;
+                font-size: 14px;
+                border-bottom: 1px solid #f1f1f1;
+            }
+    
+            .items .items-row .items-row-cell.header {
+                padding: 14px 14px;
+                font-weight: bold;
+                background: #f1f1f1;
+            }
+    
+            .items .items-row .title {
+                width: 20%;
+            }
+    
+            .items .items-row .quantity {
+                width: 20%;
+            }
+    
+            .items .items-row .unit-price {
+                width: 20%;
+            }
+    
+            .items .items-row .vat-rate {
+                width: 20%;
+            }
+    
+            .items .items-row .sum {
+                width: 20%;
+            }
+    
+            .summary {
+                margin-top: 20px;
+                padding: 30px;
+                font-size: 0;
+                background: #f1f1f1;
+            }
+    
+            .summary .summary-title {
+                width: 100%;
+                font-size: 20px;
+            }
+    
+            .summary .summary-left {
+                width: 65%;
+                display: inline-block;
+                vertical-align: top;
+                font-size: 16px;
+            }
+    
+            .summary .summary-left strong {
+                width: 200px;
+                display: inline-block;
+            }
+    
+            .summary .summary-right {
+                width: 35%;
+                display: inline-block;
+                vertical-align: top;
+                font-size: 16px;
+            }
+    
+            .summary .summary-right .split {
+                font-size: 0;
+            }
+    
+            .summary .summary-right .split .split-right,
+            .summary .summary-right .split .split-left {
+                width: 50%;
+                display: inline-block;
+                vertical-align: top;
+                font-size: 16px;
+            }
+    
+            .summary .summary-right .split .split-right {
+                text-align: right;
+            }
+        </style>
+        <div class="top">
+            <div class="top-left">
+                <div class="invoicely">
+                    <h3>{{ COMPANY_NAME }}</h3>
+                    <p>{{ ADDRESS }}</p>
+                    {% if APP_LOGO %}
+                    <img alt="" style="max-height: 40px;" src="{{APP_LOGO}}">
+                    {% endif %}
+                </div>
+
+                <div class="client">
+                    <p>{{ invoice.client.name }}</p>
+                    {% if client.logo %}
+                    <img alt="" style="max-height: 40px;" src="{{client.logo.url}}">
+                    {% endif %}
+
+                    {% if invoice.client.address1 %}
+                    <p>{{ invoice.client.address1 }}</p>
+                    {% endif %}
+                    {% if invoice.client.address2 %}
+                    <p>{{ invoice.client.address2 }}</p>
+                    {% endif %}
+
+                    {% if invoice.client.zipcode %}
+                    <p>{{ invoice.client.zipcode }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="top-right">
+                <h2>{{invoice.invoice_type|replace:'_| '}} {{ invoice.invoice_number }}</h2>
+
+                <div class="split">
+                    <div class="split-left">Email</div>
+                    <div class="split-right">{{ invoice.client.email }}</div>
+                </div>
+
+                <div class="split">
+                    <div class="split-left">Invoice date</div>
+                    <div class="split-right">{{ invoice.created_at|date:'d.m.Y' }}</div>
+                </div>
+
+                <div class="split">
+                    <div class="split-left">Due date</div>
+                    <div class="split-right">{{ invoice.get_due_date|date:'d.m.Y' }}</div>
+                </div>
+
+                {% if invoice.sender_reference %}
+                <div class="split">
+                    <div class="split-left">Our reference</div>
+                    <div class="split-right">{{ invoice.sender_reference }}</div>
+                </div>
+                {% endif %}
+
+                {% if invoice.client_contact_reference %}
+                <div class="split">
+                    <div class="split-left">Their reference</div>
+                    <div class="split-right">{{ invoice.client_contact_reference }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="items">
+            <div class="items-row">
+                <div class="items-row-cell header title">Item</div>
+
+                <div class="items-row-cell header quantity">Quantity</div>
+
+                <div class="items-row-cell header unit-price">Unit price</div>
+
+                <div class="items-row-cell header vat-rate">Vat rate</div>
+
+                <div class="items-row-cell header sum">Sum</div>
+
+                {% for item in invoice.items.all %}
+                <div class="items-row">
+                    <div class="items-row-cell title">{{ item.description }}</div>
+
+                    <div class="items-row-cell quantity">{{ item.quantity }}</div>
+
+                    <div class="items-row-cell unit-price">{{ item.unit_price }}</div>
+
+                    <div class="items-row-cell vat-rate">{{ item.vat_rate }}%</div>
+
+                    <div class="items-row-cell sum">{{ item.get_gross_amount }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="summary">
+            <div class="summary-title">
+                <h2>Summary</h2>
+            </div>
+
+            <div class="summary-left">
+                <p><strong>{{invoice.invoice_type|replace:'_| '}} number: </strong>{{ invoice.invoice_number }}</p>
+                <p><strong>Due date: </strong>{{ invoice.get_due_date|date:'d.m.Y' }}</p>
+                <p><strong>Bankaccount: </strong>{{ team.bankaccount }}</p>
+            </div>
+
+            <div class="summary-right">
+                <div class="split">
+                    <div class="split-left">Net amount</div>
+                    <div class="split-right">{{ invoice.net_amount }}</div>
+                </div>
+
+                <div class="split">
+                    <div class="split-left">Vat amount</div>
+                    <div class="split-right">{{ invoice.vat_amount }}</div>
+                </div>
+
+                <div class="split">
+                    <div class="split-left"><strong>Amount to pay</strong></div>
+                    <div class="split-right"><strong>{{ invoice.gross_amount }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer text-right">
+        <button type="button" class="btn btn-warning modal-close" data-dismiss="modal">Close</button>
+        <button onclick="printSection('invoiceSection')" class="btn btn-flat btn-primary">Print</button>
+    </div>
+</div>

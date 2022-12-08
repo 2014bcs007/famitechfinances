@@ -16,8 +16,9 @@
         <tr>
             <td>
                 {%if 'finances.edit_invoice' in perms%}
-                <button hx-get="{%url 'invoice' invoice.id%}?action=get-form" hx-target="#modal-dialog-lg" class="btn btn-xs btn-primary">{%trans 'edit'%}</button>
+                <a hx-get="{%url 'invoice' invoice.id%}?action=get-form" hx-target="#modal-dialog-lg" class="fa fa-pencil text-primary" title="{%trans 'edit'%}"></a>
                 {%endif%}
+                <a hx-get="{%url 'invoice' invoice.id%}?action=details" hx-target="#modal-dialog-lg" class="fa fa-eye text-primary" title="{%trans 'details'%}"></a>
             </td>
             <td>{{forloop.counter}}</td>
             {% for key, value in invoice.items %}
@@ -25,7 +26,7 @@
             {% endfor %}
             <td>
                 {%if 'finances.edit_invoice' in perms%}
-                <button hx-get="{%url 'invoice' invoice.id%}?action=get-form" hx-target="#modal-dialog-lg" class="btn btn-xs btn-primary">{%trans 'edit'%}</button>
+                <a hx-get="{%url 'invoice' invoice.id%}?action=get-form" hx-target="#modal-dialog-lg" class="fa fa-pencil text-primary" title="{%trans 'edit'%}"></a>
                 {%endif%}
             </td>
         </tr>

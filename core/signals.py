@@ -8,6 +8,7 @@ from core.models import TermMeta,Log,Client
 from django.contrib.admin.models import LogEntry
 from django.contrib.sessions.models import Session
 from django.db import migrations
+from finances.models import *
 
 # Save logs when a user creates any model object
 @receiver(post_save)
@@ -16,12 +17,23 @@ def track_model_create_logs(sender,instance,*args, **kwargs):
         if sender in [Log,LogEntry,Session,migrations]:
             return
         if 'created' in kwargs and kwargs['created']:
-            if sender==Asset:
-                AssetAllocation.objects.create(asset=instance,user=instance.user,department=instance.department,status=instance.status,date=instance.created_at)
-            elif sender==Task and instance.owner_model.model=='activity':
-                #Try sending a mail to the parent activity supervisor"
-                send_email(subject="New Task Created!!!",
-                body='''%s has created a new task %s under %s.'''%(instance.created_by.email,instance.title,instance.owner),mail_from=None, mail_to=[instance.owner.supervisor.email],cc=[],bcc=[],)
+            if sender==Item:
+                invoice=instance.invoice
+                try:
+                    disc=0
+                    net=0
+                    gross=0
+                    for i in invoice.items.all():
+                        disc+=i.discount
+                        net+=(i.quantity*i.unit_price)-i.discount
+                        gross+=i.quantity*i.unit_price
+                    if not invoice.discount_amount:
+                        invoice.discount_amount=disc
+                    invoice.net_amount=net
+                    invoice.gross_amount=gross
+                    invoice.save()
+                except:
+                    print("Exception occured")
             elif sender==Client:
                 send_email(subject="New Account created!!!",
                 body='''Dear %s, your account has been created successfully with email %s, for password please contact the system administrator.'''%(instance.name,instance.email),mail_from=None, mail_to=[instance.email],cc=[],bcc=[],)
@@ -45,6 +57,23 @@ def track_model_update_logs(sender,instance,*args, **kwargs):
             old=sender.objects.get(pk=instance.pk)
             new=instance
             updated_fields=[]
+            if sender==Item:
+                invoice=instance.invoice
+                try:
+                    disc=0
+                    net=0
+                    gross=0
+                    for i in invoice.items.all():
+                        disc+=i.discount
+                        net+=(i.quantity*i.unit_price)-i.discount
+                        gross+=i.quantity*i.unit_price
+                    if not invoice.discount_amount:
+                        invoice.discount_amount=disc
+                    invoice.net_amount=net
+                    invoice.gross_amount=gross
+                    invoice.save()
+                except:
+                    print("Exception occured")
             if sender==User and new.password!=old.password:
                 # Send email to owner that the password was reset
                 send_email(subject="Password reset!!!",

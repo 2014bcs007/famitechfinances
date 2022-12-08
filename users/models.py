@@ -44,7 +44,8 @@ username_validator = RegexValidator(
 
 class User(AbstractUser):
     countries_choices=(("Uganda","Uganda"),)
-    payroll_types=[("salary-scale","Salary Scale"),("workback","Workback")]
+    SALARY_SCALE='salary-scale'
+    payroll_types=[(SALARY_SCALE,"Salary Scale"),("workback","Workback")]
     username = models.CharField(max_length=255, blank=False, null=False, unique=True, validators=[])
     email = models.EmailField(max_length=255, blank=False, null=False, unique=True)
     first_name = models.CharField(max_length=255, blank=False, null=False)
@@ -66,7 +67,7 @@ class User(AbstractUser):
     designation = models.CharField(max_length=255, blank=True, null=True)
     signature = models.ImageField(blank=True,null=True, upload_to='signatures')
     employee_number = models.CharField(max_length=255, blank=True, null=True,unique=True)
-    payroll_type = models.CharField(max_length=255, blank=True, null=True,choices=payroll_types,default=payroll_types[0])
+    payroll_type = models.CharField(max_length=255, blank=True, null=True,choices=payroll_types,default=SALARY_SCALE)
     country=models.CharField(max_length=100,null=True,blank=True,choices=countries_choices,default=countries_choices[0])
     date_terminated=models.DateField(null=True,blank=True)
     is_client=models.BooleanField(default=False,editable=False)
