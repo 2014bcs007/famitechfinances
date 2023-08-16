@@ -239,33 +239,87 @@
 
     <script>
         function rerenderTable() {
-            var events = $('[data-toggle="table"]'), table = $('[data-toggle="table"]').DataTable({
-                dom: "<'row'<'col-sm-2 text-center'l><'col-sm-6'B><'col-sm-4'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-4'i><'col-sm-4 text-center'l><'col-sm-4'p>>",
-                "bDestroy": true,
-                buttons: [
-                    { extend: 'copyHtml5', text: '<i class="fa fa-files-o"></i>', titleAttr: 'Copy' },
+            var tables = $('[data-toggle="table"]');
+            tables.each((index,element) => {
+                tableElement=$(element)
+                var selectedRows=[],tableButtonsActions=tableElement.attr('data-actions');
+                tableButtonsActions=tableButtonsActions?tableButtonsActions.split(','):tableButtonsActions;
+                // if(!$.fn.DataTable.fnIsDataTable(tableElement)){
+                    
+                var table = tableElement.DataTable({
+                    dom: "<'row'<'col-sm-4 text-center'l><'col-sm-4'B><'col-sm-4'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-4'i><'col-sm-4 text-center'l><'col-sm-4'p>>",
+                    "bDestroy": true,
+                    rowId: 'id',
+                    language:{
+                        searchPlaceholder: 'Search...',
+                        sSearch: '',
+                    },
+                    buttons: [
+                    tableButtonsActions?{
+                            extend: 'collection',
+                            text: 'Bulk Action',
+                            autoClose: true,
+                            className:'btn-bulk-actions d-none',
+                            buttons:Array.from(tableButtonsActions, element =>{
+                                return {
+                                    text: element.replaceAll('_',' '), className: `text-${element.includes('delete')?'danger':'primary'} btn-${element}`,
+                                    action: function ( e, dt, node, config ) {
+                                        url=tableElement.attr('data-url')
+                                        if (url && selectedRows){
+                                            if (confirm(`You are almost making the ${element.replaceAll('_',' ')} action. Continue`)){
+                                                htmx.ajax("POST",`${url}?action=${element}`,{target:'#modal-dialog',values: {'id':selectedRows}})
+                                            }
+                                        }
+                                    }
+                                }
+                            }),
+                        }:[],
+                        { extend: 'copyHtml5', text: '<i class="fa fa-files-o"></i>', titleAttr: 'Copy' },
                     { extend: 'excelHtml5', text: '<i class="fa fa-file-excel-o"></i>', titleAttr: 'Excel' },
                     { extend: 'csvHtml5', text: '<i class="fa fa-file-text-o"></i>', titleAttr: 'CSV' },
                     { extend: 'print', text: '<i class="fa fa-print"></i>', titleAttr: 'Print' },
                     { extend: 'pdfHtml5', text: '<i class="fa fa-file-pdf-o text-danger"></i>', titleAttr: 'PDF', exportOptions: { columns: 'thead th:not(.noExport)' } },
                     { extend: 'colvis', text: 'Show' },
-                    {
-                        text: 'Delete', className: 'btn btn-danger btn-xs hidden btn-delete',
-                        action: function (e, dt, node, config) {
-    
-                        }
+                    ],
+                    "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+                    columnDefs: tableButtonsActions?[{orderable: false,className: 'select-checkbox',targets: 0}]:[],
+                    select: tableButtonsActions?{style: 'multi',selector: 'td:first-child'}:false,
+                    // select: tableButtonsActions?{style: 'multi'}:false,
+                    // select: true,
+                    "iDisplayLength": 25,
+                    responsive: false,
+                    stateSave: true,
+                    colReorder: true
+                });
+                table.on( 'draw', function () {
+                    htmx.process(element);
+                });
+
+                table.on('select', function (e, dt, type, indexes) {
+                    var rows=table.rows({selected:  true}).nodes();
+                    selectedRows=[]
+                    $.each( rows, function( key, value ) {
+                        selectedRows.push($(value).data('id'));
+                    });
+                    if(selectedRows){
+                        $('.btn-bulk-actions').removeClass('d-none');
                     }
-                ],
-                "aLengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
-                // columnDefs: [{orderable: false,className: 'select-checkbox',targets: 0}],
-                // select: {style: 'os',selector: 'td:first-child'},
-                // select: {style: 'multi'},
-                "iDisplayLength": 25,
-                responsive: false,
-                colReorder: true
+                }).on('deselect', function (e, dt, type, indexes) {
+                    selectedRows=[]
+                    var rows=table.rows({selected:  true}).nodes();
+                    $.each( rows, function( key, value ) {
+                        selectedRows.push($(value).data('id'));
+                    });
+                    if(selectedRows.length==0){
+                        $('.btn-bulk-actions').addClass('d-none');
+                    }else{
+                        $('.btn-bulk-actions').removeClass('d-none');
+                    }
+                });
+        
+                table.buttons().container().appendTo($('.col-sm-6:eq(0)', table.table().container()));
+            // }
             });
-    
-            table.buttons().container().appendTo($('.col-sm-6:eq(0)', table.table().container()));
             $(".select2,.custom-select").select2({ width: '100%' });
     
             $(".select2tag").select2({

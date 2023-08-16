@@ -1,6 +1,5 @@
 from django import forms
 from .models import *
-from core.models import Term
 from django.conf import settings
 from django.shortcuts import reverse
 from django.utils.safestring import mark_safe

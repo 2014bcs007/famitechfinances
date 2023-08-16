@@ -7,3 +7,4 @@ class ChartOfAccountAdmin(admin.ModelAdmin):
     # list_display=[field.name for field in ChartOfAccount._meta.get_fields()]
 
 admin.site.register(ChartOfAccount,ChartOfAccountAdmin)
+admin.site.register([Transaction])

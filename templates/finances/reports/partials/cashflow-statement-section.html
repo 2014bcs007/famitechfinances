@@ -1,0 +1,34 @@
+{% load static i18n custom_tags%}
+<div class="table-responsive">
+    {%if report %}
+    <h4>{{title}}</h4>
+<table class="table table-striped" data-toggle="table">
+    <thead>
+        <tr>
+            {% for header in headers %}
+            <th>{{ header|replace:"_| "|capfirst }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {%for data in report %}
+        <tr>
+            <th colspan="2"><strong>{{data.title}}</strong></th>
+        </tr>
+        {%for account in data.accounts%}
+            <tr>
+                <td class="px-5">{{account.gl_account__title}}</td>
+                <td>{{account.amount}}</td>
+            </tr>
+        {%endfor%}
+        <tr>
+            <th></th>
+            <th><strong>{{ data.total|default_if_none:'0' }}</strong></th>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%else%}
+    <div class="alert alert-danger">Nothing found in your search/filter</div>
+{%endif%}
+</div>

@@ -5,7 +5,7 @@ from django.shortcuts import render,HttpResponse,reverse,redirect
 from django.views import View
 from .models import *
 import json
-from django.db.models import Q
+from django.db.models import Q,Sum
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,6 +15,7 @@ import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin,PermissionRequiredMixin
 
 from django.forms.models import inlineformset_factory
+from core.utils import calculateCashAtHand,calculateNetProfit
 
 # Create your views here.
 class TransactionList(LoginRequiredMixin,View):
@@ -47,8 +48,11 @@ class TransactionList(LoginRequiredMixin,View):
         if not request.user.is_superuser:
             queryset=queryset.filter(created_by=request.user)
         qs_values=('transaction_code','date','amount','transaction_type','transaction_mode')
-        txt=self.filter_class(request.GET,queryset).qs.values('id','transaction_code','date','amount','transaction_type','gl_account__title','transaction_mode','cheque_number','client__name','payee','created_by__username','comment')
-        context['transactions']=txt
+        txt=self.filter_class(request.GET,queryset).qs
+        values=txt.values('id','transaction_code','date','amount','transaction_type','gl_account__title','transaction_mode','cheque_number','client__name','payee','created_by__username','comment')
+        context['transactions']=values
+        context['totals']=txt.aggregate(total_amount=(Sum("amount") )).get('total_amount',0) if values else 0
+        context['filters']=self.filter_class(request.GET)
         return render(request, self.template_name,context)
     def post(self,request,*args,**kwargs):
         context={}
@@ -264,3 +268,325 @@ class InvoiceDetailView(LoginRequiredMixin,View):
         invoice.is_active=False
         invoice.save()
         return HttpResponse(status=204,headers={'HX-Trigger':'listChanged'})
+
+
+class CashFlowView(LoginRequiredMixin, View):
+    filter_class = FinancialReportFilter
+    form_class = TransactionForm
+    model_class = Transaction
+    template_name = "finances/reports/cashflow-statement.html"
+
+    def get(self, request, *args, **kwargs):
+        action = request.GET.get("action", None)
+        startdate=request.GET.get('date_min',None)
+        enddate=request.GET.get('date_max',None)
+        if not startdate:startdate=str(datetime.date.today().replace(day=1))
+        if not enddate:enddate=datetime.date.today()
+        year=request.GET.get('year',None)
+        if year:
+            startdate="%s-01-01"%(year)
+            enddate="%s-12-31"%(year)
+        context = {
+            "title": ("Cashflow statement as at the end of the period between %s and %s"%(startdate,enddate)).upper(),
+            "filters": self.filter_class(request.GET),
+        }
+        queryset = self.model_class.objects.filter(is_active=True,date__lte=enddate,date__gte=startdate)
+        transactions_data = []
+        transactions = queryset
+        incomes=""
+        expenses=""
+        dividends=""        
+        liabilities=""
+        investing_activities=""
+        financing_activities=""
+
+        try:
+            # This has all incomes and all expenses
+            operating_activities_transactions=transactions.filter(gl_account__account_type__in=["Revenue","Operating expenses","Capital expenses","Purchases"])
+            operating_activities_transactions_grouped=(
+                operating_activities_transactions
+                .values("gl_account__title")
+                .annotate(amount=(Sum("amount") ))
+            )
+            # Combination of transactions related to assets
+            investing_activities=(
+                transactions.filter(gl_account__account_type__in=["Current assets","Fixed assets"])
+                .values("gl_account__title")
+                .annotate(amount=(Sum("amount") ))
+            )
+            # Transactions related to Owner's equity, longterm creditors
+            financing_activities=(
+                transactions.filter(gl_account__account_type__in=["Owners equity"])
+                .values("gl_account__title")
+                .annotate(amount=(Sum("amount") ))
+            )
+            data=[
+                {'title':'Operating Activities','total':'','accounts':operating_activities_transactions_grouped},
+                {'title':'Investing Activities','total':'','accounts':investing_activities},
+                {'title':'Financing Activities','total':'','accounts':financing_activities},
+            ]
+            # transactions_data = chain(investing_activities,financing_activities)
+            context['report']=data
+            # context["transactions"] = transactions_data
+
+        except Exception as e:
+            print(e)
+        
+        
+        context["headers"] = ["Account Name", "Amount"]
+        context["filters"] = self.filter_class(request.GET, queryset)
+        if request.htmx:
+            self.template_name = (
+                "finances/reports/partials/cashflow-statement-section.html"
+            )
+
+        return render(request, self.template_name, context)
+
+
+class TrialBalanceView(LoginRequiredMixin, View):
+    filter_class = FinancialReportFilter
+    form_class = TransactionForm
+    model_class = Transaction
+    template_name = "finances/reports/trial-balance.html"
+
+    def get(self, request, *args, **kwargs):
+        action = request.GET.get("action", None)
+        startdate=request.GET.get('date_min',None)
+        enddate=request.GET.get('date_max',None)
+        if not startdate:startdate=datetime.date.today().replace(day=1)
+        if not enddate:enddate=datetime.date.today()
+        year=request.GET.get('year',None)
+        if year:
+            startdate="%s-01-01"%(year)
+            enddate="%s-12-31"%(year)
+
+        context = {
+            "title": ("Trial Balance statement as at the end of the period between %s and %s"%(startdate,enddate)).upper(),
+            "filters": self.filter_class(request.GET),
+        }
+        transactions = self.model_class.objects.filter(is_active=True,date__lte=enddate,date__gte=startdate,gl_account__appear_on_trial_balance=True)
+        transactions_data = []
+        credits=transactions.filter(gl_account__account_type__in=["Revenue", "Current liabilities", "Long term liabilities", "Owners equity"])
+        debits=transactions.filter(gl_account__account_type__in=["Current assets","Fixed assets", "Operating expenses","Capital expenses","Purchases"])
+
+
+        try:
+            total_debits,total_credits=debits.aggregate(Sum("amount")).get('amount__sum',0) if debits else 0,credits.aggregate(Sum("amount")).get('amount__sum',0) if credits else 0
+            credits = list(
+                credits
+                .values("gl_account__title")
+                .annotate(debits=(Sum("amount") - Sum("amount")))
+                .annotate(credits=Sum("amount"))
+            )
+            debits = list(
+                debits
+                .values("gl_account__title")
+                .annotate(debits=(Sum("amount")))
+                .annotate(credits=(Sum("amount") - Sum("amount")))
+            )
+            # Calculate cash at hand at end of period
+            cash_at_hand=calculateCashAtHand(startdate,enddate,'trial-balance')
+            if total_credits>total_debits:
+                debits.append({'gl_account__title':'Cash at hand','debits':cash_at_hand,'credits':0})
+                total_debits=total_credits
+            elif total_credits<total_debits:
+                debits.append({'gl_account__title':'Creditors/Loans','credits':total_debits-total_credits,'debits':0})
+                total_credits=total_debits
+            context["footers"]=[{'title':'TOTALS','debits':total_debits,'credits':total_credits}]
+            transactions_data = chain(credits, debits)
+
+        except Exception as e:
+            print(e)
+        context["transactions"] = transactions_data
+        context["headers"] = ["Account Name", "Debit", "Credit"]
+        if request.htmx:
+            self.template_name = (
+                "finances/reports/partials/trial-balance-section.html"
+            )
+
+        return render(request, self.template_name, context)
+
+
+class IncomeStatementReportView(LoginRequiredMixin, View):
+    filter_class = FinancialReportFilter
+    model_class = Transaction
+    template_name = "finances/reports/income-statement.html"
+
+    def get(self, request, *args, **kwargs):
+        action = request.GET.get("action", None)
+        context = {
+            "filters": self.filter_class(request.GET),
+        }
+        startdate=request.GET.get('date_min',None)
+        enddate=request.GET.get('date_max',None)
+        if not startdate:startdate=str(datetime.date.today().replace(day=1))
+        if not enddate:enddate=datetime.date.today()
+        year=request.GET.get('year',None)
+        if year:
+            startdate="%s-01-01"%(year)
+            enddate="%s-12-31"%(year)
+        transactions = self.model_class.objects.filter(is_active=True,date__gte=startdate,date__lte=enddate)
+        transactions_data = []
+        # transactions = self.filter_class(request.GET, Transaction.objects.filter()).qs
+        income_list=[]
+        expense_list=[]
+        purchases_list=[]
+        try:
+            income_list=transactions.filter(gl_account__account_type__in=["Revenue"]).values("gl_account__title").annotate(amount=Sum("amount") )
+            expense_list=transactions.filter(gl_account__account_type__in=["Operating expenses","Capital Expenses"]).values("gl_account__title").annotate(amount=Sum("amount") )
+            purchases_list=(transactions.filter(gl_account__account_type__in=["Purchases"]).values("gl_account__title").annotate(assets=(Sum("amount") )))
+            # owners_equity_list=(
+            #     transactions.filter(gl_account__account_type__in=["Owners equity"])
+            #     .values("gl_account__title")
+            #     .annotate(equity=(Sum("amount") ))
+            # )
+        except Exception as e:
+            print(e)
+        if transactions:
+            total_income=income_list.aggregate(Sum("amount")).get('amount__sum',0) if income_list else 0
+            
+            # To be considered as the closing from the previous period calculations reports
+            opening_stock=transactions.filter(gl_account__is_opening_stock=True)
+            opening_stock=opening_stock.aggregate(Sum("amount")).get('amount__sum',0) if opening_stock else 0
+            # calculateCashAtHand(None,datetime.datetime.strptime(startdate, "%Y-%m-%d")-datetime.timedelta(days=1))
+            total_purchases=purchases_list.aggregate(Sum('amount')).get('amount__sum',0) if purchases_list else 0
+
+            # Need to be grabbed from the Trial Balance (as cash at hand at end of period). In case the value is negative then it means it is credit (therefore need to use Zero)
+            closing_stock=transactions.filter(gl_account__is_closing_stock=True)
+            closing_stock=closing_stock.aggregate(Sum("amount")).get('amount__sum',0) if closing_stock else 0
+            # calculateCashAtHand(startdate,enddate)
+            goods_available_for_sale=(opening_stock+total_purchases)-closing_stock
+            total_expenses=expense_list.aggregate(Sum("amount")).get('amount__sum',0) if expense_list else 0
+            gross_profit=total_income-goods_available_for_sale
+            net_profit=gross_profit-(total_expenses)
+            context['report']={
+                'income_list':income_list,
+                'total_income':total_income,
+                'cost_of_sales':[
+                    {'title':'Opening Stock','amount':opening_stock if opening_stock>=0 else "(%s)"%(abs(opening_stock))},
+                    {'title':'Purchases','amount':total_purchases},
+                ],
+                'closing_stock':"(%s)"%(abs(closing_stock)) if closing_stock!=0 else 0,
+                'goods_available_for_sale':goods_available_for_sale if goods_available_for_sale>=0 else "(%s)"%(abs(goods_available_for_sale)),
+                'gross_profit':gross_profit if gross_profit>=0 else "(%s)"%(abs(gross_profit)),
+                'expense_list':expense_list,
+                'total_expenses':total_expenses,
+                'net_profit':net_profit if net_profit>=0 else "(%s)"%(abs(net_profit)),
+                'title':("Statement of comprehensive account for the period between %s and %s"%(startdate, enddate)).upper()
+            }
+            
+        if request.htmx:
+            self.template_name = (
+                "finances/reports/partials/income-statement-section.html"
+            )
+
+        return render(request, self.template_name, context)
+
+
+
+class BalanceSheetView(LoginRequiredMixin, View):
+    filter_class = FinancialReportFilter
+    form_class = TransactionForm
+    model_class = Transaction
+    template_name = "finances/reports/balancesheet.html"
+
+    def get(self, request, *args, **kwargs):
+        action = request.GET.get("action", None)
+        startdate=request.GET.get('date_min',None)
+        enddate=request.GET.get('date_max',None)
+        if not startdate:startdate=str(datetime.date.today().replace(day=1))
+        if not enddate:enddate=datetime.date.today()
+        year=request.GET.get('year',None)
+        if year:
+            startdate="%s-01-01"%(year)
+            enddate="%s-12-31"%(year)
+        context = {
+            "title": "Balance Sheet",
+            "filters": self.filter_class(request.GET),
+        }
+        
+        transactions = self.model_class.objects.filter(is_active=True,date__gte=startdate,date__lte=enddate)
+        transactions_data = []
+        # transactions = self.filter_class(request.GET, Transaction.objects.filter()).qs
+        incomes=""
+        expenses=""
+        dividends=""        
+        liabilities=""
+        investing_activities=""
+        financing_activities=""
+        current_assets_list,non_current_assets_list,current_liabilities_list,non_current_liabilities_list,owners_equity_list=[],[],[],[],[]
+
+        try:
+            current_assets_list=(
+                transactions.filter(gl_account__account_type__in=["Current assets"])
+                .values("gl_account__title")
+                .annotate((Sum("amount") ))
+            )
+            non_current_assets_list=(
+                transactions.filter(gl_account__account_type__in=["Fixed assets"])
+                .values("gl_account__title")
+                .annotate((Sum("amount") ))
+            )
+            dividends=(
+                transactions.filter(gl_account__account_type__in=["Dividends"])
+                .values("gl_account__title")
+                .annotate((Sum("amount") ))
+            )
+            current_liabilities_list=(
+                transactions.filter(gl_account__account_type__in=["Current liabilities"])
+                .values("gl_account__title")
+                .annotate(assets=(Sum("amount") ))
+            )
+            non_current_liabilities_list=(
+                transactions.filter(gl_account__account_type__in=["Long term liabilities"])
+                .values("gl_account__title")
+                .annotate(assets=(Sum("amount") ))
+            )
+            owners_equity_list=(
+                transactions.filter(gl_account__account_type__in=["Owners equity"])
+                .values("gl_account__title")
+                .annotate(equity=(Sum("amount") ))
+            )
+        except Exception as e:
+            print(e)
+        if transactions:
+            assetsAmmount=(current_assets_list.aggregate(Sum("amount")).get('amount__sum',0) if current_assets_list else 0)+(non_current_assets_list.aggregate(Sum("amount")).get('amount__sum',0)if non_current_assets_list else 0)
+            liabilitiesAmmount=(current_liabilities_list.aggregate(Sum("amount")).get('amount__sum',0) if current_liabilities_list else 0)+(non_current_liabilities_list.aggregate(Sum("amount")).get('amount__sum',0) if non_current_liabilities_list else 0)+(owners_equity_list.aggregate(Sum("amount")).get('amount__sum',0) if owners_equity_list else 0)
+            
+            # Picked from the PnL report
+            net_profit=calculateNetProfit(startdate,enddate)
+            liabilitiesAmmount+=net_profit
+            owners_equity_list=list(owners_equity_list)
+
+            
+            owners_equity_list.append(
+                {'gl_account__title':'Net Profit','amount':net_profit if net_profit>=0 else "(%s)"%(abs(net_profit))}
+            )
+
+            # To be picked from the Trial Balance
+            cash_at_hand=calculateCashAtHand(startdate,enddate,'trial-balance')
+            assetsAmmount+=cash_at_hand
+            current_assets_list=list(current_assets_list)
+            current_assets_list.append(
+                {'gl_account__title':'Cash at hand','amount':cash_at_hand if cash_at_hand>=0 else "(%s)"%(abs(cash_at_hand))}
+            )
+            context['data']=[
+                {'title':'ASSETS','items':[
+                    {"title":"Current Assets","items":current_assets_list},
+                    {"title":"Non-Current Assets","items":non_current_assets_list},
+                ],'totals':assetsAmmount if assetsAmmount>=0 else "(%s)"%(abs(assetsAmmount))},
+                {'title':'LIABILITIES & EQUITY','items':[
+                    {"title":"Current Liabilities","items":current_liabilities_list},
+                    {"title":"Non-Current Liabilities","items":non_current_liabilities_list},
+                    {"title":"Equity","items":owners_equity_list}
+                ],'totals':liabilitiesAmmount if liabilitiesAmmount>=0 else "(%s)"%(abs(liabilitiesAmmount))},
+            ]
+            context['report_title']=("Balance sheet for the period from %s to %s"%(startdate, enddate)).upper()
+        context["filters"] = self.filter_class(request.GET)
+        
+        if request.htmx:
+            self.template_name = (
+                "finances/reports/partials/balancesheet-section.html"
+            )
+
+        return render(request, self.template_name, context)

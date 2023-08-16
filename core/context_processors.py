@@ -1,9 +1,68 @@
 from django.conf import settings
 from django.shortcuts import redirect, reverse
 import os
-from .utils import SidebarData
 from .models import Config,Client
 
+SidebarData = [
+    {
+        "title": "Dashboard", "path": reverse('home'), "icon": "fa fa-home"
+    },
+    {
+        "title": "Users",
+        "path": "#",
+        "icon": "fa fa-users",
+        "permissions": "users.view_user",
+        "subNav": [
+            { "title": "Users Summary", "path": "%s?display=summary"%(reverse('users')) },
+            { "title": "Users Report", "path": reverse('users') },
+            { "title": "Inactive Users", "path": "%s?is_active=False"%(reverse('users')) }
+        ]
+    },
+    {
+        "title": "Client Mgt",
+        "path": "#",
+        "icon": "fa fa-user",
+        "permissions": "users.manage_user",
+        "subNav": [
+            { "title": "Add Client", "hx_path": "%s?action=get-form"%(reverse("clients")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
+            { "title": "Clients List", "path": reverse("clients"), "icon": "fa fa-user","permissions": "users.manage_user", },
+        ]
+    },
+    {
+        "title": "Quotes",
+        "path": "#",
+        "icon": "fa fa-wrench",
+        "permissions": "finances.view_invoice",
+        "subNav": [
+            { "title": "Add Quote",'hx_target':'#modal-dialog-lg', "hx_path": "%s?invoice_type=quote&action=get-form"%(reverse("invoices")), "icon": "fa fa-pencil","permissions": "finances.add_invoice", },
+            { "title": "List Quotes", "path": "%s?invoice_type=quote"%(reverse("invoices")), "icon": "fa fa-user","permissions": "finances.view_invoice", },
+        ]
+    },
+    {
+        "title": "Income",
+        "path": "#",
+        "icon": "fa fa-dollar",
+        "subNav": [
+            { "title": "Add Income", "hx_path": "%s?transaction_type=income&action=get-form"%(reverse("transactions")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
+            { "title": "Income List", "path": "%s?transaction_type=income"%(reverse("transactions")), "icon": "fa fa-user","permissions": "users.manage_user", },
+        ]
+    },
+    {
+        "title": "Expenses",
+        "path": "#",
+        "icon": "fa fa-paypal",
+        "subNav": [
+            { "title": "Add Expense", "hx_path": "%s?transaction_type=expense&action=get-form"%(reverse("transactions")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
+            { "title": "Expenses List", "path": "%s?transaction_type=expense"%(reverse("transactions")), "icon": "fa fa-user","permissions": "users.manage_user", },
+        ]
+    },
+    {
+        "title": "Audit Logs", "path": reverse('logs'), "icon": "fa fa-bars","permissions": "users.manage_user",
+    },
+    {
+        "title":"Logout",'path':reverse("account_logout"),'icon':'fa fa-power-off'
+    }
+]
 
 def core_configurations(request):
     BASE_URL="%s://%s"%(request.scheme,request.get_host())
@@ -29,6 +88,10 @@ def core_configurations(request):
         {'title':'Reports','icon':'','subNav':[
             {'title':'Users List','icon':'fa fa-user','permission':'users.view_user','path':reverse('users')},
             {'title':'Clients','icon':'fa fa-users','permission':'core.view_client','path':reverse('clients')},
+            { "title": "CashFlow",'icon':'fa fa-list', "path": reverse('cashflow') },
+            { "title": "Trial Balance",'icon':'fa fa-list', "path": reverse('trialbalance') },
+            { "title": "Income Statement",'icon':'fa fa-list', "path": reverse('income-statement') },
+            { "title": "Balance Sheet",'icon':'fa fa-list', "path": reverse('balancesheet') },
         ]}
     ]
 

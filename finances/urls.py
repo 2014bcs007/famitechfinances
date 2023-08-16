@@ -10,4 +10,10 @@ urlpatterns = [
 
     path('invoices/', InvoicesView.as_view(),name='invoices'),
     path('invoices/<int:pk>/', InvoiceDetailView.as_view(),name="invoice"),
+
+    # Report
+    path("cashflow/", CashFlowView.as_view(), name="cashflow"),
+    path("trialbalance/", TrialBalanceView.as_view(), name="trialbalance"),
+    path("income-statement/", IncomeStatementReportView.as_view(), name="income-statement"),
+    path("balancesheet/", BalanceSheetView.as_view(), name="balancesheet"),
 ]

@@ -119,63 +119,55 @@ def calculate_paye(employee,gross,taxable_income):
     return paye_tax
 
 
-SidebarData = [
-    {
-        "title": "Dashboard", "path": reverse('home'), "icon": "fa fa-home"
-    },
-    {
-        "title": "Users",
-        "path": "#",
-        "icon": "fa fa-users",
-        "permissions": "users.view_user",
-        "subNav": [
-            { "title": "Users Summary", "path": "%s?display=summary"%(reverse('users')) },
-            { "title": "Users Report", "path": reverse('users') },
-            { "title": "Inactive Users", "path": "%s?is_active=False"%(reverse('users')) }
-        ]
-    },
-    {
-        "title": "Client Mgt",
-        "path": "#",
-        "icon": "fa fa-user",
-        "permissions": "users.manage_user",
-        "subNav": [
-            { "title": "Add Client", "hx_path": "%s?action=get-form"%(reverse("clients")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
-            { "title": "Clients List", "path": reverse("clients"), "icon": "fa fa-user","permissions": "users.manage_user", },
-        ]
-    },
-    {
-        "title": "Quotes",
-        "path": "#",
-        "icon": "fa fa-wrench",
-        "permissions": "finances.view_invoice",
-        "subNav": [
-            { "title": "Add Quote",'hx_target':'#modal-dialog-lg', "hx_path": "%s?invoice_type=quote&action=get-form"%(reverse("invoices")), "icon": "fa fa-pencil","permissions": "finances.add_invoice", },
-            { "title": "List Quotes", "path": "%s?invoice_type=quote"%(reverse("invoices")), "icon": "fa fa-user","permissions": "finances.view_invoice", },
-        ]
-    },
-    {
-        "title": "Income",
-        "path": "#",
-        "icon": "fa fa-dollar",
-        "subNav": [
-            { "title": "Add Income", "hx_path": "%s?transaction_type=income&action=get-form"%(reverse("transactions")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
-            { "title": "Income List", "path": "%s?transaction_type=income"%(reverse("transactions")), "icon": "fa fa-user","permissions": "users.manage_user", },
-        ]
-    },
-    {
-        "title": "Expenses",
-        "path": "#",
-        "icon": "fa fa-paypal",
-        "subNav": [
-            { "title": "Add Expense", "hx_path": "%s?transaction_type=expense&action=get-form"%(reverse("transactions")), "icon": "fa fa-pencil","permissions": "users.manage_user", },
-            { "title": "Expenses List", "path": "%s?transaction_type=expense"%(reverse("transactions")), "icon": "fa fa-user","permissions": "users.manage_user", },
-        ]
-    },
-    {
-        "title": "Audit Logs", "path": reverse('logs'), "icon": "fa fa-bars","permissions": "users.manage_user",
-    },
-    {
-        "title":"Logout",'path':reverse("account_logout"),'icon':'fa fa-power-off'
-    }
-]
+
+
+
+def calculateCashAtHand(startdate=None,enddate=None,report=None):
+    from finances.models import Transaction
+    transactions=Transaction.objects.filter(is_active=True)
+    if startdate:
+        transactions=transactions.filter(date__gte=startdate)
+    if enddate:
+        transactions=transactions.filter(date__lte=enddate)
+    
+    if report=='trial-balance':transactions=transactions.filter(gl_account__appear_on_trial_balance=True)
+    try:
+        credits=transactions.filter(gl_account__account_type__in=["Revenue", "Current liabilities", "Long term liabilities", "Owners equity"])
+        debits=transactions.filter(gl_account__account_type__in=["Current assets","Fixed assets", "Operating expenses","Capital expenses","Purchases"])
+        total_debits,total_credits=debits.aggregate(Sum("amount")).get('amount__sum',0) if debits else 0,credits.aggregate(Sum("amount")).get('amount__sum',0) if credits else 0
+        bal=(total_credits-total_debits)
+        return bal
+    except:
+        pass
+    return 0
+
+def calculateNetProfit(startdate=None,enddate=None):
+    from finances.models import Transaction
+    transactions=Transaction.objects.filter(is_active=True)
+    if startdate:
+        transactions=transactions.filter(date__gte=startdate)
+    if enddate:
+        transactions=transactions.filter(date__lte=enddate)
+    try:
+        income_list=transactions.filter(gl_account__account_type__in=["Revenue"]).values("gl_account__title").annotate(amount=Sum("amount") )
+        expense_list=transactions.filter(gl_account__account_type__in=["Operating expenses","Capital Expenses"]).values("gl_account__title").annotate(amount=Sum("amount") )
+        purchases_list=(transactions.filter(gl_account__account_type__in=["Purchases"]).values("gl_account__title").annotate(assets=(Sum("amount") )))
+        total_income=income_list.aggregate(Sum("amount")).get('amount__sum',0) if income_list else 0
+            
+        # To be considered as the closing from the previous period calculations reports
+        opening_stock=transactions.filter(gl_account__is_opening_stock=True)
+        opening_stock=opening_stock.aggregate(Sum("amount")).get('amount__sum',0) if opening_stock else 0
+        total_purchases=purchases_list.aggregate(Sum('amount')).get('amount__sum',0) if purchases_list else 0
+
+        # Need to be grabbed from the Trial Balance (as cash at hand at end of period). In case the value is negative then it means it is credit (therefore need to use Zero)
+        # closing_stock=calculateCashAtHand(startdate,enddate)
+        closing_stock=transactions.filter(gl_account__is_closing_stock=True)
+        closing_stock=closing_stock.aggregate(Sum("amount")).get('amount__sum',0) if closing_stock else 0
+        goods_available_for_sale=(opening_stock+total_purchases)-closing_stock
+        total_expenses=expense_list.aggregate(Sum("amount")).get('amount__sum',0) if expense_list else 0
+        gross_profit=total_income-goods_available_for_sale
+        net_profit=gross_profit-(total_expenses)
+        return net_profit
+    except Exception as ex:
+        print(ex)
+    return 0

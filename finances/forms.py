@@ -14,7 +14,7 @@ from crispy_forms.layout import Layout, Fieldset, Div
 
 class ChartOfAccountForm(forms.ModelForm):
     row1_col1=['title','code','account_type','status']
-    row1_col2=['parent','description']
+    row1_col2=['is_opening_stock','is_closing_stock','appear_on_trial_balance','parent','description']
     def __init__(self, *args, **kwargs):
         super(ChartOfAccountForm, self).__init__(*args, **kwargs)
         if 'title' in self.fields:self.fields['title'].required=True
@@ -33,7 +33,7 @@ class ChartOfAccountForm(forms.ModelForm):
         )
     class Meta:
         model=ChartOfAccount
-        fields=['title','code','account_type','description','parent','status']
+        fields=['title','code','account_type','description','is_opening_stock','is_closing_stock','appear_on_trial_balance','parent','status']
         widgets={
             'startdate':forms.DateInput(attrs={'type':'date'}),
             'description':forms.Textarea(attrs={'rows':2}),

@@ -7,6 +7,10 @@
             <th>{%trans 'Name'%}</th>
             <th>{%trans 'Code'%}</th>
             <th>{%trans 'Account Type'%}</th>
+            <!-- <th>{%trans 'Manual entries allowed'%}</th> -->
+            <th>{%trans 'Appear on trial balance'%}</th>
+            <th>{%trans 'Is Opening Stock'%}</th>
+            <th>{%trans 'Is Closing Stock'%}</th>
             <th>{%trans 'Parent Account'%}</th>
             <th>{%trans 'Status'%}</th>
             <th>Actions</th>
@@ -19,6 +23,10 @@
             <td>{{ account.name|default_if_none:'' }}</td>
             <td>{{ account.code|default_if_none:'' }}</td>
             <td>{{ account.get_account_type_display|default_if_none:'' }}</td>
+            <!-- <td><i class="fa fa-{%if account.manual_entries_allowed%}check text-success{%else%}times text-danger{%endif%}"></i></td> -->
+            <td><i class="fa fa-{%if account.appear_on_trial_balance%}check text-success{%else%}times text-danger{%endif%}"></i></td>
+            <td><i class="fa fa-{%if account.is_opening_stock%}check text-success{%else%}times text-danger{%endif%}"></i></td>
+            <td><i class="fa fa-{%if account.is_closing_stock%}check text-success{%else%}times text-danger{%endif%}"></i></td>
             <td>{{ account.parent|default_if_none:'' }}</td>
             <td>{{ account.get_status_display|default_if_none:'' }}</td>
             <td>
@@ -34,5 +42,5 @@
     </tbody>
 </table>
 {%else%}
-    <div class="alert alert-danger">No accounts registered</div>
+    <div class="alert alert-danger">No ledger accounts registered</div>
 {%endif%}

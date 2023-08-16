@@ -12,10 +12,13 @@ from datetime import timedelta
 class ChartOfAccount(BaseModel):
     title=models.CharField(max_length=255,null=False,blank=True)
     code=models.CharField(max_length=255,null=False,blank=True)
-    account_type=models.CharField(max_length=255,null=False,blank=True,choices=(('asset',"Assets"),('liability',"Liabilities"),('income',"Income"),('expense',"Expenses"),('capital',"Capital")))
+    account_type=models.CharField(max_length=255,null=False,blank=True,choices=(('Fixed assets',"Fixed assets"),("Current assets","Current assets"),('Current liabilities',"Current liabilities"),("Long term liabilities","Long term liabilities"),('Revenue',"Revenue"),('Operating expenses',"Operating expenses"),("Capital expenses","Capital expenses"),('Owners equity',"Owners equity"),("Retained earnings","Retained earnings"),("Bank","Bank"),('Dividends',"Dividends"),("Accounts payable","Accounts payable"),("Accounts receivable","Accounts receivable"),("Cost of goods sold","Cost of goods sold"),("Purchases","Purchases")))
     description=models.TextField(null=True,blank=True)
     status=models.PositiveIntegerField(null=False,blank=True,default=1,choices=((1,"Active"),(2,"Inactive")))
     parent=models.ForeignKey('ChartOfAccount',null=True,blank=True,on_delete=models.SET_NULL)
+    appear_on_trial_balance=models.BooleanField(default=True,blank=True)
+    is_opening_stock=models.BooleanField(default=False,blank=True)
+    is_closing_stock=models.BooleanField(default=False,blank=True)
     is_active= models.BooleanField(default=True,editable=False)
     def __str__(self):
         return "%s | %s (%s)"%(self.account_type,self.title,self.code)
@@ -26,9 +29,6 @@ class ChartOfAccount(BaseModel):
 
 class Transaction (BaseModel):
     transaction_code=models.CharField(max_length=255,null=False,blank=True)
-    # target_model = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.CASCADE)  #Say User/Member,Account, Loan, Group etc
-    # target_id = models.PositiveIntegerField(null=True, blank=True)   #Actual parent ID
-    # target = GenericForeignKey('target_model', 'target_id')
     date=models.DateField(null=False,blank=True)
     transaction_type=models.CharField(max_length=255,null=False,blank=True)
     transaction_mode=models.CharField(max_length=45,null=False,blank=True,default="Cash",choices=(("Cash","Cash"),("Cheque","Cheque")))

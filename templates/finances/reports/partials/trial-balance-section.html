@@ -1,0 +1,35 @@
+{% load static i18n custom_tags %}
+<div class="table-responsive">
+{%if transactions %}
+<h4>{{title}}</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            {% for header in headers %}
+            <th>{{ header|replace:"_| "|capfirst }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {%for transaction in transactions %}
+        <tr>
+            {% for key, value in transaction.items %}
+            <td>{{ value|default_if_none:'' }}</td>
+            {% endfor %}
+        </tr>
+        {%endfor%}
+    </tbody>
+    {%if footers%}
+    <tfoot>
+        {%for footer in footers%}
+            <tr>
+                {%for key,item in footer.items%}<th><strong>{{item}}</strong></th>{%endfor%}
+            </tr>
+        {%endfor%}
+    </tfoot>
+    {%endif%}
+</table>
+{%else%}
+    <div class="alert alert-danger">Nothing found in your search/filter</div>
+{%endif%}
+</div>

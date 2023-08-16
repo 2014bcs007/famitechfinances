@@ -1,0 +1,26 @@
+{% load static i18n custom_tags%}
+<div class="table-responsive">
+    {%if data %}
+    <h4 class="mt-3">{{report_title}}</h4>
+    <table class="table table-striped">
+        <tbody>
+            {%for item in data %}
+                <tr><th colspan="2"><strong>{{item.title}}</strong></th></tr>
+                {% for subitem in item.items %}
+                    <tr><td class="px-4"><strong>{{subitem.title}}</strong></td><td></td></tr>
+                    {% for i in subitem.items%}
+                        <tr>
+                            {%for k,d in i.items%}
+                                <td class="px-6">{{d}}</td>
+                            {%endfor%}
+                        </tr>
+                    {%endfor%}
+                {% endfor %}
+                <tr><th><strong>TOTAL {{item.title}}</strong></th><th class="align-right"><strong>{{item.totals}}</strong></th></tr>
+            {%endfor%}
+        </tbody>
+    </table>
+    {%else%}
+        <div class="alert alert-danger">Nothing found in your search/filter</div>
+    {%endif%}
+</div>

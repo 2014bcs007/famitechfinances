@@ -1,6 +1,8 @@
 
 import django_filters
+from django_filters import *
 from .models import *
+from django_filters.widgets import RangeWidget
 
 class ChartOfAccountsFilter(django_filters.FilterSet):
     # target_model__model = django_filters.DateFilter(field_name='date')
@@ -11,13 +13,23 @@ class ChartOfAccountsFilter(django_filters.FilterSet):
         # exclude=['is_active','created_by']
 
 class TransactionsFilter(django_filters.FilterSet):
-    # target_model__model = django_filters.DateFilter(field_name='date')
+    transaction_type=django_filters.ChoiceFilter(choices=(('income',"Income"),('expense',"Expenses")))
+    date=DateFromToRangeFilter(field_name='date', widget=RangeWidget(attrs={'type':'date'}))
+    amount=RangeFilter(field_name='amount',label='amount', widget=RangeWidget(attrs={'type':'number'}))
+    
     class Meta:
         model=Transaction
-        # fields=['till_session','till','date','till_session__teller','target_model__model','target_id','branch']
-        exclude=['is_active','created_by']
+        exclude=['is_active','updated_by','updated_at','created_at']
 
 class InvoicesFilter(django_filters.FilterSet):
     class Meta:
         model=Invoice
         exclude=['is_active','created_by']
+
+class FinancialReportFilter(django_filters.FilterSet):
+    date=DateFromToRangeFilter(field_name='date', widget=RangeWidget(attrs={'type':'date'}))
+    year = django_filters.NumberFilter(field_name='date',label='Year',lookup_expr='year')
+    
+    class Meta:
+        model=Transaction
+        fields=['date','year']
