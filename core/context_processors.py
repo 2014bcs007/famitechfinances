@@ -88,6 +88,7 @@ def core_configurations(request):
         {'title':'Reports','icon':'','subNav':[
             {'title':'Users List','icon':'fa fa-user','permission':'users.view_user','path':reverse('users')},
             {'title':'Clients','icon':'fa fa-users','permission':'core.view_client','path':reverse('clients')},
+            { "title": "Income Vs Expenses",'icon':'fa fa-list', "path": reverse('income-expense-report') },
             { "title": "CashFlow",'icon':'fa fa-list', "path": reverse('cashflow') },
             { "title": "Trial Balance",'icon':'fa fa-list', "path": reverse('trialbalance') },
             { "title": "Income Statement",'icon':'fa fa-list', "path": reverse('income-statement') },

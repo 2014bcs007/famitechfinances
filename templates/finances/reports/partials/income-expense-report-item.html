@@ -1,0 +1,9 @@
+<tr>
+    <td>{{item.title.title}}</td>
+    <td>{{item.income}}</td>
+    <td>{{item.expenses}}</td>
+    <td>{{item.balance}}</td>
+</tr>
+{%for item in item.items%}
+    {%include 'finances/reports/partials/income-expense-report-item.html' with items=item.items%}
+{%endfor%}

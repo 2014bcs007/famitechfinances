@@ -15,13 +15,21 @@ class ChartOfAccount(BaseModel):
     account_type=models.CharField(max_length=255,null=False,blank=True,choices=(('Fixed assets',"Fixed assets"),("Current assets","Current assets"),('Current liabilities',"Current liabilities"),("Long term liabilities","Long term liabilities"),('Revenue',"Revenue"),('Operating expenses',"Operating expenses"),("Capital expenses","Capital expenses"),('Owners equity',"Owners equity"),("Retained earnings","Retained earnings"),("Bank","Bank"),('Dividends',"Dividends"),("Accounts payable","Accounts payable"),("Accounts receivable","Accounts receivable"),("Cost of goods sold","Cost of goods sold"),("Purchases","Purchases")))
     description=models.TextField(null=True,blank=True)
     status=models.PositiveIntegerField(null=False,blank=True,default=1,choices=((1,"Active"),(2,"Inactive")))
-    parent=models.ForeignKey('ChartOfAccount',null=True,blank=True,on_delete=models.SET_NULL)
+    parent=models.ForeignKey('ChartOfAccount',null=True,blank=True,on_delete=models.SET_NULL,related_name='children')
     appear_on_trial_balance=models.BooleanField(default=True,blank=True)
     is_opening_stock=models.BooleanField(default=False,blank=True)
     is_closing_stock=models.BooleanField(default=False,blank=True)
     is_active= models.BooleanField(default=True,editable=False)
     def __str__(self):
         return "%s | %s (%s)"%(self.account_type,self.title,self.code)
+    
+    @property
+    def get_children(self):
+        children = list()
+        children.append(self)
+        for child in self.children.all():
+            children.extend(child.get_children)
+        return children
 
     @property
     def name(self):

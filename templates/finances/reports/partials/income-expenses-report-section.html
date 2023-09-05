@@ -1,0 +1,23 @@
+{% load static i18n custom_tags%}
+<div class="table-responsive">
+    {%if list %}
+    <h4>{{title}}</h4>
+<table class="table table-striped" data-toggle="table">
+    <thead>
+        <tr>
+            <th>Particular</th>
+            <th>Income</th>
+            <th>Expense</th>
+            <th>Difference</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for item in list %}
+            {%include 'finances/reports/partials/income-expense-report-item.html'%}
+        {%endfor%}
+    </tbody>
+</table>
+{%else%}
+    <div class="alert alert-danger">Nothing found in your search/filter</div>
+{%endif%}
+</div>

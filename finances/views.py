@@ -269,6 +269,54 @@ class InvoiceDetailView(LoginRequiredMixin,View):
         invoice.save()
         return HttpResponse(status=204,headers={'HX-Trigger':'listChanged'})
 
+class IncomeExpenseReport(LoginRequiredMixin,View):
+    filter_class = FinancialReportFilter
+    form_class = TransactionForm
+    model_class = Transaction
+    template_name = "finances/reports/income-expenses-report.html"
+
+    def get(self, request, *args, **kwargs):
+        startdate=request.GET.get('date_min',None)
+        enddate=request.GET.get('date_max',None)
+        if not startdate:startdate=str(datetime.date.today().replace(day=1))
+        if not enddate:enddate=datetime.date.today()
+        year=request.GET.get('year',None)
+        if year:
+            startdate="%s-01-01"%(year)
+            enddate="%s-12-31"%(year)
+        mainAccounts=ChartOfAccount.objects.filter(parent__isnull=True)
+
+        items=[]
+        for chart in mainAccounts:
+            items.append(get_ledger_account_children(chart,startdate=startdate,enddate=enddate))
+            
+
+        context={'filters':self.filter_class,'list':items,'title':("Income-Expenses report as at the end of the period between %s and %s"%(startdate,enddate)).upper()}
+        if request.htmx:
+            self.template_name='finances/reports/partials/income-expenses-report-section.html'
+        return render(request,self.template_name,context)
+
+def get_ledger_account_children(chart,startdate=None,enddate=None):
+    children = list()
+    children.append(chart)
+    items=[]
+    income,expenses=0,0
+
+    for child in chart.children.all():
+        items.append(get_ledger_account_children(child,startdate=startdate,enddate=enddate))
+        # ids.append(child.pk)
+    allTransactions=Transaction.objects.filter(gl_account__in=chart.get_children,date__lte=enddate,date__gte=startdate)
+    expensesAmount=allTransactions.filter(transaction_type='expense').aggregate(total=Sum('amount'))
+    expensesAmount=expensesAmount.get('total',0) if expensesAmount else 0
+    expenses+=expensesAmount if expensesAmount else 0
+
+    incomeAmount=allTransactions.filter(transaction_type='income').aggregate(total=Sum('amount'))
+    incomeAmount=incomeAmount.get('total',0) if incomeAmount else 0
+    income+=incomeAmount if incomeAmount else 0
+    balance=income-expenses
+        # children.extend(child.get_children(child))
+    segment={'title':chart,'items':items,'income':income,'expenses':expenses,'balance':balance if balance>=0 else "(%s)"%(abs(balance))}
+    return segment
 
 class CashFlowView(LoginRequiredMixin, View):
     filter_class = FinancialReportFilter

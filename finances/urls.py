@@ -12,6 +12,7 @@ urlpatterns = [
     path('invoices/<int:pk>/', InvoiceDetailView.as_view(),name="invoice"),
 
     # Report
+    path('income-expense-report',IncomeExpenseReport.as_view(),name='income-expense-report'),
     path("cashflow/", CashFlowView.as_view(), name="cashflow"),
     path("trialbalance/", TrialBalanceView.as_view(), name="trialbalance"),
     path("income-statement/", IncomeStatementReportView.as_view(), name="income-statement"),

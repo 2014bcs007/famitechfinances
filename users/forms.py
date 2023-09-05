@@ -38,7 +38,7 @@ class AddUserForm(forms.ModelForm):
     col2_fields=['gender','designation','phone','date_joined','payroll_type']
     # col3_fields=['nssf_number','bank','branch_location','account_number','account_name','tin']
     col3_fields=['department','nin','dob','marital_status','country']
-    row2_fields=['profile_pic','is_superuser','is_active','groups','user_permissions']
+    row2_fields=['profile_pic','is_superuser','is_staff','is_active','groups','user_permissions']
     def __init__(self, *args, **kwargs):
         super(AddUserForm, self).__init__(*args, **kwargs)
         if 'password' in self.fields and 'initial' in kwargs and kwargs['initial'].get("pop-password",None):
